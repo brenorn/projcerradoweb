@@ -1,0 +1,446 @@
+Análise de Dados Municipais com Python: Um Guia Exaustivo para a API do IBGE e Construção de Dashboards InterativosIntroduçãoEste relatório serve como um guia técnico definitivo para desenvolvedores e analistas de dados que buscam explorar programaticamente o vasto ecossistema de dados do Instituto Brasileiro de Geografia e Estatística (IBGE). O objetivo é ir além da simples consulta a um endpoint, fornecendo uma metodologia completa que abrange desde a desconstrução da complexa arquitetura das APIs disponíveis até a implementação de código Python robusto e de qualidade de produção para aquisição de dados. O processo culmina na construção de uma aplicação analítica poderosa e interativa, projetada para a comparação detalhada de indicadores municipais.O desafio central ao interagir com os serviços do IBGE não reside na tecnologia de acesso — que se baseia em APIs REST convencionais — mas sim na navegação por um sistema multifacetado e na tradução de questões analíticas humanas (por exemplo, "Qual o Produto Interno Bruto per capita de Cavalcante, GO?") em requisições de API específicas e legíveis por máquina. A ausência de uma documentação que mapeie diretamente indicadores de interesse para os parâmetros técnicos necessários cria uma lacuna semântica que é a principal fonte de dificuldade. Este guia foi concebido para resolver sistematicamente esse problema, oferecendo não apenas o "como", mas também o "o quê" e o "onde" da coleta de dados.A estrutura deste documento seguirá uma progressão lógica. Iniciaremos com uma análise arquitetônica fundamental dos serviços de dados do IBGE, seguida por uma avaliação criteriosa das ferramentas de software livre disponíveis no ecossistema Python. Com essa base, desenvolveremos um cliente de dados reutilizável e, por fim, construiremos uma aplicação analítica completa, demonstrando como transformar dados brutos em insights visuais e comparativos. Ao final, o leitor estará equipado com o conhecimento e o código necessários para construir suas próprias ferramentas de análise municipal, aproveitando uma das fontes de dados mais ricas do Brasil.Seção 1: O Ecossistema de Dados do IBGE: Uma Visão ArquitetônicaPara interagir de forma eficaz com os serviços de dados do IBGE, é imprescindível compreender que não se trata de uma única API monolítica, mas de uma coleção de serviços especializados. Uma solução completa e robusta requer a orquestração de chamadas a várias dessas APIs, cada uma com um propósito distinto. Esta seção disseca a função de cada serviço e detalha a estrutura das requisições, estabelecendo a base técnica para o desenvolvimento subsequente.1.1 Desmistificando as APIs do IBGE: Um Cenário Multi-ServiçoA infraestrutura de dados abertos do IBGE é composta por múltiplos serviços, cada um expondo um tipo diferente de informação. A combinação inteligente desses serviços é a chave para construir uma aplicação abrangente.1API de Agregados (SIDRA): Este é o serviço principal e o mais complexo, servindo como a porta de entrada para a vasta maioria dos dados estatísticos provenientes de censos e pesquisas do IBGE.3 A documentação oficial, encontrada em servicodados.ibge.gov.br/api/docs/agregados, é o ponto de partida para entender sua estrutura.5 Esta API, que essencialmente expõe os dados do Sistema IBGE de Recuperação Automática (SIDRA), será o foco principal para a obtenção de indicadores socioeconômicos.5API de Localidades: Este serviço é fundamental para tarefas de configuração e para popular a interface do usuário. Ele fornece listas de entidades geográficas como estados, mesorregiões e, crucialmente, municípios, juntamente com seus respectivos códigos de identificação.7 A obtenção desses códigos é um pré-requisito para formular consultas precisas à API de Agregados. Por exemplo, para obter dados de um município específico, seu código IBGE de 7 dígitos é necessário.8API de Malhas Geográficas: Essencial para a criação de visualizações cartográficas, como mapas de coropletos. Esta API fornece os dados geoespaciais que definem os limites territoriais das unidades geográficas, como os polígonos dos municípios. Os dados podem ser obtidos em formatos padrão como GeoJSON, TopoJSON ou SVG.9API de Metadados: Um serviço mais especializado que permite a consulta de informações sobre as próprias operações estatísticas, como a descrição de variáveis, a metodologia da pesquisa e os documentos de referência associados.10 Embora não seja central para a coleta de dados brutos, é uma ferramenta valiosa para entender o contexto e a linhagem da informação.1.2 Anatomia de uma Requisição à API de Agregados (SIDRA)Uma requisição bem-sucedida à API de Agregados é, em sua essência, uma URL cuidadosamente construída. Cada parte da URL funciona como um parâmetro que filtra e especifica o recorte exato dos dados desejados. A estrutura geral da requisição é a seguinte 3:https://servicodados.ibge.gov.br/api/v3/agregados/{agregado}/periodos/{periodos}/variaveis/{variavel}?localidades={nivel}[{id_localidade}]&classificacoes={...}Os componentes chave são:{agregado}: O identificador numérico da tabela de dados (ou "agregado") que se deseja consultar. Este é o parâmetro mais crítico e, muitas vezes, o mais difícil de descobrir. Por exemplo, a tabela "Produto Interno Bruto dos Municípios" pode ter um ID como 5938 12, enquanto a tabela de "População residente" do Censo 2022 tem o ID 9514. Este ID representa uma pesquisa ou um recorte específico de dados.3localidades={nivel}[{id_localidade}]: Especifica o nível geográfico e as localidades de interesse. Para dados municipais, o nível geográfico é N6. Para obter dados de todos os municípios do Brasil, a sintaxe é N6[all]. Para um município específico, como Cavalcante (código 5205307), a sintaxe seria N6. É possível solicitar múltiplos níveis ou localidades separando-os com | (codificado como %7C na URL).3periodos={periodo}: Define o ano ou o intervalo de tempo para o qual os dados são solicitados. Por exemplo, 2010 para o Censo Demográfico daquele ano ou 2021 para o PIB mais recente.variaveis={variavel}: O identificador numérico da variável (o indicador) desejada. Por exemplo, dentro de uma tabela de população, a variável "População residente" pode ter o ID 93. Múltiplas variáveis podem ser solicitadas, separadas por |.classificacoes={classificacao}[{categoria}]: Um parâmetro poderoso para um refinamento adicional dos dados. Permite filtrar os resultados com base em categorias específicas, como sexo, faixa etária, cor ou raça, entre outras.Compreender essa estrutura é o primeiro passo. O passo seguinte, e mais desafiador, é descobrir os valores corretos para preencher esses parâmetros.1.3 A "Lacuna Semântica": Estratégias para Descobrir Códigos de Tabelas e VariáveisO obstáculo mais significativo para um novo desenvolvedor é a "lacuna semântica": a desconexão entre uma pergunta em linguagem natural ("Qual a taxa de escolarização?") e os códigos numéricos que a API exige para agregado e variavel. A documentação da API explica a sintaxe da chamada, mas não fornece um catálogo pesquisável de todos os códigos de conteúdo. Uma estratégia de sucesso deve, obrigatoriamente, incluir métodos para transpor essa lacuna.Método 1: Descoberta Manual via Website do SIDRAA abordagem mais fundamental é usar a interface web do próprio SIDRA (https://sidra.ibge.gov.br) como uma ferramenta de exploração.13 O processo envolve:Navegar ou buscar pela pesquisa de interesse (ex: "PIB dos Municípios").Selecionar a tabela desejada na lista de resultados.Na página da tabela, clicar no ícone de "Links" ou "Compartilhar" e selecionar "Link para a consulta na API".Analisar a URL gerada. Esta URL conterá todos os códigos necessários: o ID da tabela (/t/ ou agregado), o ID da variável (/v/), o nível geográfico (/n/), etc. Este método, embora manual, é infalível para encontrar os códigos de qualquer tabela disponível no portal.11Método 2: Uso do "Query Builder" da APIA própria documentação da API de Agregados fornece uma ferramenta interativa chamada Query Builder.6 Este construtor de consultas permite ao usuário selecionar visualmente a pesquisa, as variáveis, as localidades e outros parâmetros a partir de menus suspensos. À medida que as seleções são feitas, a ferramenta monta dinamicamente a URL da requisição da API. Esta é uma excelente maneira de aprender a estrutura da API de forma interativa e de descobrir os códigos necessários sem a necessidade de navegar por todo o portal SIDRA.Método 3: Exploração Programática de MetadadosPara soluções mais avançadas e dinâmicas, é possível consultar os metadados da API de forma programática. Uma chamada GET para o endpoint https://servicodados.ibge.gov.br/api/v3/agregados retorna uma lista em formato JSON com todos os agregados (tabelas) disponíveis.3 A partir daí, é possível construir funções que consultam os metadados de um agregado específico para listar suas variáveis, períodos e classificações disponíveis. Bibliotecas como a pysus já encapsulam essa funcionalidade, oferecendo métodos como IBGE.list_agregados() que retornam um DataFrame Pandas com os agregados disponíveis, simplificando a exploração.19 Esta abordagem é ideal para construir ferramentas que permitem ao usuário final descobrir e selecionar dados dinamicamente.Seção 2: O Kit de Ferramentas Python para Dados do IBGEA comunidade Python oferece um ecossistema de bibliotecas que podem acelerar significativamente o desenvolvimento de aplicações que consomem dados do IBGE. No entanto, não existe uma única biblioteca que resolva todos os problemas. O cenário é fragmentado, com diferentes ferramentas especializadas em distintas partes do ecossistema de dados do IBGE. A estratégia mais eficaz, portanto, não é procurar por uma solução única, mas sim orquestrar de forma inteligente a melhor ferramenta para cada tarefa específica. Esta seção avalia as bibliotecas mais relevantes e justifica a arquitetura de software escolhida para este projeto.2.1 Levantamento das Bibliotecas de Código Aberto ExistentesUma análise do GitHub e do PyPI revela várias bibliotecas que visam simplificar o acesso aos dados do IBGE, atendendo diretamente à solicitação do usuário de economizar tempo ao aproveitar projetos existentes.20 Cada uma possui um foco bem definido:sidrapy: Uma biblioteca focada exclusivamente em facilitar o acesso aos dados tabulares da API SIDRA. Ela abstrai a construção manual da URL da API, permitindo que o desenvolvedor passe os parâmetros da tabela (código da tabela, variáveis, localidades, etc.) como argumentos de uma função Python, retornando os dados diretamente em um DataFrame Pandas.5geobr: Uma ferramenta poderosa para o download de dados geoespaciais oficiais do Brasil. Ela simplifica enormemente a obtenção de malhas territoriais (limites de estados, municípios, setores censitários, etc.) para diferentes anos, retornando os dados como um GeoDataFrame, pronto para análise espacial e plotagem de mapas.23ibge: Uma biblioteca leve e direta, cujo principal propósito é interagir com a API de Localidades. Ela oferece uma interface simples para obter listas de estados, municípios por UF, e outras divisões geográficas, sendo ideal para popularizar seletores em uma interface de usuário.25pyibge: Uma biblioteca mais antiga com uma proposta similar à sidrapy, mas com menos funcionalidades e manutenção. Requer que o usuário construa a string de parâmetros da API manualmente.26pysus: Embora focada em dados do Sistema Único de Saúde (SUS), esta biblioteca possui um módulo IBGE que oferece funções úteis para a exploração programática de metadados, como a listagem de agregados.19Essa especialização confirma que uma abordagem "melhor de cada classe" (best-of-breed) é a mais indicada. Utilizaremos sidrapy para a extração de dados estatísticos, ibge para a obtenção de listas de municípios, e geobr para o enriquecimento geoespacial necessário para a criação de mapas.2.2 Análise Comparativa das Principais BibliotecasPara formalizar a decisão sobre quais ferramentas utilizar, a tabela a seguir apresenta uma análise comparativa, destacando os pontos fortes e as limitações de cada biblioteca principal.Tabela 2.2.1: Análise Comparativa de Bibliotecas Python para Dados do IBGEBibliotecaUso PrincipalPontos FortesLimitaçõesRecomendaçãosidrapyExtração de dados estatísticos da API SIDRA/Agregados.- Implementa diretamente os parâmetros da API SIDRA.
+- Retorna dados como DataFrame Pandas.
+- Simplifica consultas complexas.- Requer conhecimento prévio dos códigos numéricos da tabela e das variáveis.
+- Não auxilia na descoberta de dados.Recomendada para o núcleo da extração de dados.geobrDownload de dados geoespaciais (malhas territoriais).- Interface extremamente simples.
+- Integração nativa com geopandas.
+- Harmoniza projeções e atributos.- Focada apenas em dados geográficos, não acessa estatísticas.
+- Downloads podem ser grandes para dados de alta resolução.Essencial para a criação de mapas.ibgeListagem de localidades (estados, municípios).- API muito simples e direta para obter listas e códigos.
+- Leve e sem dependências complexas.- Não acessa dados estatísticos da API de Agregados.
+- Funcionalidade limitada à API de Localidades.Útil para a configuração inicial e preenchimento de seletores.pyibgeExtração de dados da API SIDRA (alternativa).- Wrapper simples para a API.- Menos mantida e documentada que a sidrapy.
+- Requer construção manual da string de parâmetros.Não recomendada; sidrapy é uma alternativa superior.2.3 Chamadas Diretas à API vs. Bibliotecas Wrapper: Uma Decisão EstratégicaA escolha entre usar uma biblioteca wrapper como a sidrapy ou fazer chamadas diretas à API usando a biblioteca requests envolve um balanço entre conveniência e controle.Bibliotecas Wrapper (sidrapy, ibge): A principal vantagem é a abstração. Elas lidam com a construção da URL, o envio da requisição HTTP, a verificação de status e a conversão da resposta JSON em um formato amigável como um DataFrame Pandas. Isso acelera o desenvolvimento e reduz a quantidade de código repetitivo.Chamadas Diretas (requests): Oferecem controle total sobre a requisição. Isso é útil para interagir com endpoints não cobertos pelas bibliotecas, para implementar lógicas de repetição (retry) e tratamento de erros mais sofisticadas, ou para otimizar o manuseio de headers e timeouts.Nossa abordagem será híbrida: utilizaremos as bibliotecas para as tarefas que elas executam bem (extração de dados e listas de localidades) para maximizar a produtividade. No entanto, o conhecimento de como fazer uma chamada direta é fundamental, e o código do nosso cliente de dados encapsulará essa lógica, permitindo uma futura substituição ou extensão, se necessário.2.4 Configuração do AmbientePara garantir a reprodutibilidade e evitar conflitos de dependências, é crucial configurar um ambiente virtual dedicado para o projeto.Passos para Configuração:Abra um terminal ou prompt de comando.Navegue até o diretório do seu projeto.Crie um ambiente virtual:Bashpython -m venv venv
+Ative o ambiente:No Windows: venv\Scripts\activateNo macOS/Linux: source venv/bin/activateCrie um arquivo chamado requirements.txt no diretório do projeto com o seguinte conteúdo:pandasrequestssidrapygeobrgeopandasstreamlitplotlyNota: A biblioteca dash seria adicionada aqui caso se optasse por essa implementação.Instale todas as dependências de uma vez:Bashpip install -r requirements.txt
+Com o ambiente configurado, estamos prontos para começar a desenvolver o código de aquisição de dados.Seção 3: Aquisição de Dados Municipais: Da Teoria à PráticaCom a arquitetura da API compreendida e as ferramentas selecionadas, esta seção foca na implementação do código para buscar os dados. O objetivo é criar uma solução robusta, reutilizável e que abstraia as complexidades das chamadas de API, entregando o que foi solicitado: "códigos perfeitos". Para isso, desenvolveremos uma classe Python que servirá como um cliente centralizado para todas as interações com os dados do IBGE.3.1 Código Fundamental: Recuperando uma Lista Mestra de MunicípiosO primeiro passo em qualquer aplicação de análise municipal é obter uma lista completa dos municípios e seus respectivos códigos IBGE. Esses dados são essenciais para popularizar os controles da interface do usuário (como menus suspensos) e para formular as consultas subsequentes à API de Agregados. A API de Localidades v1 é a fonte ideal para esta informação.7 A biblioteca ibge oferece um wrapper conveniente para este endpoint.25A função a seguir demonstra como obter um DataFrame Pandas contendo todos os municípios de um determinado estado (UF) ou de todo o Brasil.Pythonimport pandas as pd
+import requests
+
+def get_lista_municipios(uf: str = 'all') -> pd.DataFrame:
+    """
+    Busca a lista de municípios de um estado (UF) ou de todo o Brasil na API de Localidades do IBGE.
+
+    Args:
+        uf (str): A sigla da Unidade Federativa (ex: 'GO', 'SP'). 
+                  Se 'all', retorna todos os municípios do Brasil.
+
+    Returns:
+        pd.DataFrame: DataFrame com as colunas 'codigo_ibge' e 'nome_municipio'.
+    """
+    if uf.lower() == 'all':
+        url = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios"
+    else:
+        url = f"https://servicodados.ibge.gov.br/api/v1/localidades/estados/{uf}/municipios"
+    
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()  # Lança uma exceção para códigos de erro HTTP (4xx ou 5xx)
+        data = response.json()
+        
+        df = pd.DataFrame(data)
+        df = df[['id', 'nome']]
+        df.columns = ['codigo_ibge', 'nome_municipio']
+        df['codigo_ibge'] = df['codigo_ibge'].astype(str)
+        
+        return df.sort_values('nome_municipio').reset_index(drop=True)
+
+    except requests.exceptions.RequestException as e:
+        print(f"Erro ao buscar dados da API de Localidades: {e}")
+        return pd.DataFrame(columns=['codigo_ibge', 'nome_municipio'])
+
+# Exemplo de uso:
+# df_goias = get_lista_municipios('GO')
+# print(df_goias.head())
+3.2 Mapeando Indicadores Chave para a APIUm dos aspectos mais críticos e que demonstra uma compreensão aprofundada do ecossistema de dados é reconhecer que a página "Cidades e Estados" do IBGE é, na verdade, um portal agregador. Ela exibe indicadores que não são originários do próprio IBGE, como o Índice de Desenvolvimento Humano Municipal (IDHM), que é calculado pelo Programa das Nações Unidas para o Desenvolvimento (PNUD), e dados detalhados de mortalidade, provenientes do DATASUS, do Ministério da Saúde.28Isso significa que uma solução baseada exclusivamente nas APIs do IBGE não conseguirá replicar 100% da página de referência. É fundamental gerenciar essa expectativa. A tabela a seguir serve como um "mapa de tradução" prático, conectando indicadores de alto interesse aos parâmetros técnicos necessários para buscá-los na API SIDRA e, crucialmente, identificando a fonte de cada um. Este artefato é a solução direta para a "lacuna semântica" e a peça mais valiosa para economizar tempo no desenvolvimento.Tabela 3.2.1: Mapeamento de Indicadores para a API SIDRA/AgregadosIndicadorFonte de DadosTabela SIDRA (agregado)Variável (variavel)Buscável via API IBGE?NotasPopulação ResidenteIBGE - Censo 2022951493SimPopulação total por município.População EstimadaIBGE - Estimativas65799324SimEstimativa anual. Usar o ano mais recente disponível.PIB per capitaIBGE - PIB Municípios593837SimValor a preços correntes.Área TerritorialIBGE - Malhas84181213SimÁrea da unidade territorial em km².Densidade DemográficaIBGE - Censo 2022951410263SimCalculado como População / Área.Taxa de EscolarizaçãoIBGE - Censo 201013831630Sim% de 6 a 14 anos matriculados. Dados do Censo 2010.IDHMPNUDN/AN/ANãoDeve ser obtido de fontes do PNUD (Atlas Brasil).Mortalidade InfantilDATASUS / MSN/AN/ANãoDeve ser obtido de fontes do DATASUS.3.3 Implementação Avançada: Uma Classe IBGEClient ReutilizávelPara entregar um código de alta qualidade, encapsularemos toda a lógica de acesso a dados em uma classe Python. Esta abordagem, conhecida como Padrão de Projeto Facade, oferece uma interface simples e unificada para um subsistema complexo, promovendo a reutilização de código, a manutenibilidade e a testabilidade.A classe IBGEClient irá:Utilizar a função get_lista_municipios.Usar a Tabela 3.2.1 como um mapa de configuração interno.Implementar um método de alto nível get_indicadores para buscar múltiplos dados de uma só vez.Utilizar a biblioteca sidrapy para as chamadas à API SIDRA.5Incorporar um cache em memória para evitar chamadas repetidas à API, essencial para o desempenho de um dashboard interativo.Pythonimport pandas as pd
+import sidrapy
+import requests
+from functools import lru_cache
+
+class IBGEClient:
+    """
+    Cliente para interagir com as APIs de dados do IBGE, 
+    focando na obtenção de indicadores municipais.
+    """
+    def __init__(self):
+        self.indicador_map = {
+            'populacao_censo_2022': {'agregado': '9514', 'variavel': '93', 'classificacoes': {}},
+            'populacao_estimada': {'agregado': '6579', 'variavel': '9324', 'classificacoes': {}},
+            'pib_per_capita': {'agregado': '5938', 'variavel': '37', 'classificacoes': {}},
+            'area_territorial': {'agregado': '8418', 'variavel': '1213', 'classificacoes': {}},
+            'densidade_demografica_2022': {'agregado': '9514', 'variavel': '10263', 'classificacoes': {}},
+            'taxa_escolarizacao_2010': {'agregado': '1383', 'variavel': '1630', 'classificacoes': {'C2': '1'}}
+        }
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def get_lista_municipios(uf: str = 'all') -> pd.DataFrame:
+        """Busca a lista de municípios. Utiliza cache para evitar chamadas repetidas."""
+        # (Implementação da função get_lista_municipios de 3.1 aqui)
+        if uf.lower() == 'all':
+            url = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios"
+        else:
+            url = f"https://servicodados.ibge.gov.br/api/v1/localidades/estados/{uf}/municipios"
+        
+        try:
+            response = requests.get(url, timeout=30)
+            response.raise_for_status()
+            df = pd.DataFrame(response.json())
+            df = df[['id', 'nome']].rename(columns={'id': 'codigo_ibge', 'nome': 'nome_municipio'})
+            df['codigo_ibge'] = df['codigo_ibge'].astype(str)
+            return df.sort_values('nome_municipio').reset_index(drop=True)
+        except requests.exceptions.RequestException as e:
+            print(f"Erro ao buscar lista de municípios: {e}")
+            return pd.DataFrame()
+
+    def get_indicador(self, nome_indicador: str, codigos_municipios: list, periodo: str = 'last') -> pd.DataFrame:
+        """
+        Busca um indicador específico para uma lista de municípios.
+
+        Args:
+            nome_indicador (str): Chave do indicador (ex: 'pib_per_capita').
+            codigos_municipios (list): Lista de códigos IBGE de 7 dígitos dos municípios.
+            periodo (str): O ano desejado. 'last' busca o último período disponível.
+
+        Returns:
+            pd.DataFrame: DataFrame com os dados do indicador para os municípios.
+        """
+        if nome_indicador not in self.indicador_map:
+            raise ValueError(f"Indicador '{nome_indicador}' não reconhecido. Disponíveis: {list(self.indicador_map.keys())}")
+
+        params = self.indicador_map[nome_indicador]
+        codigos_str = "|".join(codigos_municipios)
+        
+        try:
+            # O sidrapy trata 'last' internamente para muitos casos, mas para ser explícito,
+            # seria necessário buscar os períodos disponíveis primeiro.
+            # Para simplificar, assumimos que o usuário fornecerá um ano válido ou 'last'.
+            data = sidrapy.get_table(
+                table_code=params['agregado'],
+                territorial_level="6",
+                ibge_territorial_code=codigos_str,
+                variable=params['variavel'],
+                period=periodo,
+                classifications=params['classificacoes'] if 'classificacoes' in params else {},
+                header='n'
+            )
+            
+            if data is None or len(data) <= 1:
+                return pd.DataFrame()
+
+            # Limpeza e formatação dos dados retornados pelo sidrapy
+            df = pd.DataFrame(data[1:], columns=data)
+            df = df]
+            df.columns = ['codigo_ibge', 'nome_municipio', nome_indicador]
+            df[nome_indicador] = pd.to_numeric(df[nome_indicador], errors='coerce')
+            
+            return df[['codigo_ibge', nome_indicador]]
+
+        except Exception as e:
+            print(f"Erro ao buscar dados do SIDRA para o indicador '{nome_indicador}': {e}")
+            return pd.DataFrame()
+
+# Exemplo de uso da classe:
+# client = IBGEClient()
+# municipios_go = client.get_lista_municipios('GO')
+# codigos_selecionados = ['5205307', '5200509'] # Cavalcante, Alto Paraíso de Goiás
+# pib_data = client.get_indicador('pib_per_capita', codigos_selecionados, '2021')
+# print(pib_data)
+Seção 4: Análise Municipal Comparativa com PandasCom um método robusto para adquirir os dados, o próximo passo é estruturá-los e analisá-los. A biblioteca Pandas é a ferramenta padrão da indústria para esta tarefa em Python, oferecendo estruturas de dados e operações de alta performance para manipulação de tabelas. Esta seção demonstra como preparar os dados para comparação e enriquecê-los com informações geoespaciais para visualizações de mapa.4.1 Estruturando Dados para ComparaçãoO objetivo é criar uma única tabela (DataFrame) que consolide múltiplos indicadores para múltiplos municípios, facilitando a análise comparativa. O processo envolve buscar cada indicador separadamente usando nosso IBGEClient e depois uni-los em um único DataFrame, usando o código do município como chave de junção.Pythonfrom functools import reduce
+
+def compilar_dados_municipais(client: IBGEClient, codigos_municipios: list, indicadores_periodos: dict) -> pd.DataFrame:
+    """
+    Compila múltiplos indicadores para uma lista de municípios em um único DataFrame.
+
+    Args:
+        client (IBGEClient): Uma instância do nosso cliente de dados.
+        codigos_municipios (list): Lista de códigos IBGE dos municípios.
+        indicadores_periodos (dict): Dicionário onde as chaves são os nomes dos indicadores
+                                     e os valores são os períodos (anos) desejados.
+                                     Ex: {'pib_per_capita': '2021', 'populacao_estimada': '2021'}
+
+    Returns:
+        pd.DataFrame: Um DataFrame consolidado com municípios como linhas e indicadores como colunas.
+    """
+    # Busca a lista de nomes dos municípios para usar como base
+    df_base = client.get_lista_municipios('all')
+    df_base = df_base[df_base['codigo_ibge'].isin(codigos_municipios)]
+
+    dfs_indicadores = [df_base]
+    for indicador, periodo in indicadores_periodos.items():
+        print(f"Buscando {indicador} para o período {periodo}...")
+        df_indicador = client.get_indicador(indicador, codigos_municipios, periodo)
+        if not df_indicador.empty:
+            dfs_indicadores.append(df_indicador)
+
+    # Une todos os DataFrames de indicadores em um só
+    if len(dfs_indicadores) > 1:
+        df_final = reduce(lambda left, right: pd.merge(left, right, on='codigo_ibge', how='left'), dfs_indicadores)
+        return df_final.set_index('codigo_ibge')
+    else:
+        return df_base.set_index('codigo_ibge')
+
+# Exemplo de uso:
+# client = IBGEClient()
+# codigos_chapada = ['5205307', '5200509', '5221304'] # Cavalcante, Alto Paraíso, Teresina de Goiás
+# indicadores = {
+#     'pib_per_capita': '2021',
+#     'populacao_estimada': '2021',
+#     'area_territorial': '2022'
+# }
+# df_comparativo = compilar_dados_municipais(client, codigos_chapada, indicadores)
+# print(df_comparativo)
+4.2 Técnicas Analíticas com PandasCom os dados consolidados em um DataFrame, podemos aplicar diversas técnicas analíticas para extrair insights.29Comparação Direta e Ordenação: A forma mais simples de análise é exibir a tabela e ordená-la por um indicador de interesse para criar um ranking.Python# Supondo que df_comparativo foi criado
+# print("Ranking por PIB per capita:")
+# print(df_comparativo.sort_values('pib_per_capita', ascending=False))
+Normalização: Para comparações justas entre municípios de tamanhos diferentes, é essencial normalizar os dados. Por exemplo, calcular a densidade demográfica (se não for buscada diretamente) ou outros indicadores per capita.Python# if 'populacao_estimada' in df_comparativo.columns and 'area_territorial' in df_comparativo.columns:
+#     df_comparativo['densidade_calculada'] = df_comparativo['populacao_estimada'] / df_comparativo['area_territorial']
+Cálculo de Deltas e Percentuais: Comparar o valor de um município com uma média (estadual ou nacional) pode fornecer um contexto valioso.Python# Supondo que 'pib_per_capita' existe e temos a média do estado
+# pib_medio_go = 45000 # Valor hipotético
+# df_comparativo['delta_pib_vs_media_go'] = (df_comparativo['pib_per_capita'] - pib_medio_go) / pib_medio_go * 100
+# print(df_comparativo[['nome_municipio', 'pib_per_capita', 'delta_pib_vs_media_go']])
+4.3 Enriquecimento com Dados Geoespaciais para MapeamentoVisualizações de mapa são extremamente eficazes para análises geográficas. Para criá-las, precisamos dos polígonos que representam os limites de cada município. A biblioteca geobr é a ferramenta perfeita para essa tarefa, simplificando o download desses dados.23 O passo crucial é mesclar nosso DataFrame estatístico com o GeoDataFrame fornecido pelo geobr, usando o código IBGE como chave de junção. O resultado é um único GeoDataFrame que contém tanto os dados numéricos quanto a geometria, pronto para ser plotado.31Pythonimport geobr
+import geopandas as gpd
+
+def adicionar_geometrias(df_dados: pd.DataFrame) -> gpd.GeoDataFrame:
+    """
+    Adiciona as geometrias dos municípios a um DataFrame de dados.
+
+    Args:
+        df_dados (pd.DataFrame): DataFrame com uma coluna de índice contendo os códigos IBGE.
+
+    Returns:
+        gpd.GeoDataFrame: Um GeoDataFrame com os dados e as geometrias.
+    """
+    codigos_municipios = df_dados.index.tolist()
+    
+    # Busca as malhas de todos os municípios do Brasil (geobr otimiza o download)
+    # Para performance, poderia-se buscar por UF se todos os municípios forem do mesmo estado.
+    print("Buscando malhas geográficas...")
+    malha_municipal = geobr.read_municipality(year=2020) # Usando malha de 2020
+    
+    # Filtra para os municípios de interesse
+    malha_selecionada = malha_municipal[malha_municipal['code_muni'].astype(str).isin(codigos_municipios)]
+    
+    # Renomeia a coluna de código para corresponder e define como índice
+    malha_selecionada = malha_selecionada.rename(columns={'code_muni': 'codigo_ibge'})
+    malha_selecionada['codigo_ibge'] = malha_selecionada['codigo_ibge'].astype(str)
+    malha_selecionada = malha_selecionada.set_index('codigo_ibge')
+    
+    # Une o DataFrame de dados com o GeoDataFrame das malhas
+    gdf_final = df_dados.join(malha_selecionada['geometry'])
+    
+    return gpd.GeoDataFrame(gdf_final, geometry='geometry')
+
+# Exemplo de uso:
+# gdf_comparativo = adicionar_geometrias(df_comparativo)
+# print(gdf_comparativo.head())
+# gdf_comparativo.plot() # Plotagem simples para verificar
+Seção 5: Construindo um Dashboard de Análise Municipal InterativoEsta seção representa a culminação do projeto: a transformação de nossos scripts de aquisição e análise de dados em uma aplicação web interativa. O objetivo é permitir que um usuário final, sem conhecimento de programação, possa selecionar municípios e indicadores para realizar comparações dinâmicas.5.1 Escolhendo o Framework Certo: Streamlit vs. DashA escolha da ferramenta para construir o dashboard é uma decisão estratégica. O ecossistema Python oferece duas opções principais, cada uma com suas próprias filosofias e vantagens.Streamlit: É um framework que permite transformar scripts de análise de dados em aplicações web compartilháveis em minutos. Sua principal vantagem é a simplicidade e a velocidade de desenvolvimento. Ele segue um modelo de execução de cima para baixo, onde a cada interação do usuário, o script é reexecutado. Isso o torna ideal para prototipagem rápida, dashboards de exploração de dados e para desenvolvedores que desejam "economizar tempo" e não têm experiência prévia em desenvolvimento web.33Plotly Dash: É um framework mais robusto e flexível, construído sobre Flask, Plotly.js e React.js. Ele utiliza uma arquitetura baseada em callbacks reativos, onde componentes da interface são explicitamente ligados a funções Python. Isso oferece um controle granular sobre a aplicação, tornando-o mais adequado para dashboards complexos, aplicações de múltiplas páginas e sistemas de nível de produção que exigem otimizações de desempenho mais detalhadas.36Para este guia, a recomendação principal é o Streamlit. Sua curva de aprendizado suave e o alinhamento com o fluxo de trabalho de um analista de dados o tornam a escolha perfeita para atender rapidamente ao núcleo da solicitação do usuário. No entanto, para demonstrar uma solução "perfeita" e mais escalável, uma implementação equivalente usando Dash será fornecida no apêndice.5.2 Tutorial Completo: Um Dashboard Comparativo com StreamlitA seguir, apresentamos o código completo para uma aplicação (app.py) que utiliza a classe IBGEClient e as funções de análise desenvolvidas anteriormente para criar um dashboard interativo.Estrutura do Projeto:/seu_projeto
+
+|-- venv/
+|-- app.py
+|-- ibge_client.py   # Arquivo contendo a classe IBGEClient e funções auxiliares
+|-- requirements.txt
+Código (app.py):Pythonimport streamlit as st
+import pandas as pd
+import plotly.express as px
+from ibge_client import IBGEClient, compilar_dados_municipais, adicionar_geometrias
+
+# --- Configuração da Página ---
+st.set_page_config(
+    page_title="Comparador de Municípios - IBGE",
+    page_icon="🇧🇷",
+    layout="wide"
+)
+
+# --- Instanciação do Cliente ---
+# O cache do Streamlit é ideal para objetos como este
+@st.cache_resource
+def get_client():
+    return IBGEClient()
+
+client = get_client()
+
+# --- Carregamento de Dados Iniciais ---
+@st.cache_data
+def carregar_municipios():
+    return client.get_lista_municipios('all')
+
+df_municipios_total = carregar_municipios()
+lista_nomes_municipios = df_municipios_total['nome_municipio'].tolist()
+
+# --- Layout da Interface (Sidebar) ---
+st.sidebar.title("Painel de Controle")
+st.sidebar.markdown("Selecione os municípios e os indicadores para a comparação.")
+
+municipios_selecionados_nomes = st.sidebar.multiselect(
+    label="Selecione os Municípios",
+    options=lista_nomes_municipios,
+    default=
+)
+
+mapa_indicadores = {
+    "PIB per capita (2021)": "pib_per_capita",
+    "População Estimada (2021)": "populacao_estimada",
+    "Área Territorial (2022)": "area_territorial",
+    "Densidade Demográfica (2022)": "densidade_demografica_2022"
+}
+indicador_selecionado_nome = st.sidebar.selectbox(
+    label="Selecione o Indicador",
+    options=list(mapa_indicadores.keys())
+)
+indicador_selecionado_chave = mapa_indicadores[indicador_selecionado_nome]
+periodo_indicador = indicador_selecionado_nome.split('(')[-1].replace(')', '')
+
+# --- Lógica Principal e Exibição ---
+st.title("📊 Comparador de Indicadores Municipais do IBGE")
+st.markdown("Use o painel à esquerda para selecionar municípios e indicadores.")
+
+if not municipios_selecionados_nomes:
+    st.warning("Por favor, selecione pelo menos um município para começar.")
+else:
+    # Obter códigos dos municípios selecionados
+    codigos_selecionados = df_municipios_total[
+        df_municipios_total['nome_municipio'].isin(municipios_selecionados_nomes)
+    ]['codigo_ibge'].tolist()
+
+    # Dicionário de indicadores a serem buscados
+    indicadores_a_buscar = {indicador_selecionado_chave: periodo_indicador}
+
+    # Compilar dados
+    with st.spinner("Buscando e compilando dados... Isso pode levar um momento."):
+        df_comparativo = compilar_dados_municipais(client, codigos_selecionados, indicadores_a_buscar)
+
+    if df_comparativo.empty or indicador_selecionado_chave not in df_comparativo.columns:
+        st.error(f"Não foi possível obter os dados para o indicador '{indicador_selecionado_nome}'. Verifique a disponibilidade dos dados para o ano e municípios selecionados.")
+    else:
+        st.header(f"Comparativo: {indicador_selecionado_nome}")
+        
+        # --- Visualizações ---
+        col1, col2 = st.columns((1, 1.5)) # Proporção das colunas
+
+        with col1:
+            st.subheader("Tabela de Dados")
+            # Ordena e formata a tabela para exibição
+            df_display = df_comparativo.sort_values(indicador_selecionado_chave, ascending=False).reset_index()
+            st.dataframe(df_display[['nome_municipio', indicador_selecionado_chave]], use_container_width=True)
+
+        with col2:
+            st.subheader("Gráfico de Barras")
+            fig_bar = px.bar(
+                df_display,
+                x='nome_municipio',
+                y=indicador_selecionado_chave,
+                title=f"Comparativo de {indicador_selecionado_nome}",
+                labels={'nome_municipio': 'Município', indicador_selecionado_chave: indicador_selecionado_nome}
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+        # --- Mapa Coroplético ---
+        st.header("Visualização Geográfica")
+        with st.spinner("Gerando mapa..."):
+            try:
+                gdf_comparativo = adicionar_geometrias(df_comparativo)
+                
+                # Centraliza o mapa
+                gdf_comparativo_proj = gdf_comparativo.to_crs(epsg=4326)
+                centro = gdf_comparativo_proj.dissolve().centroid.iloc
+
+                fig_map = px.choropleth_mapbox(
+                    gdf_comparativo,
+                    geojson=gdf_comparativo.geometry,
+                    locations=gdf_comparativo.index,
+                    color=indicador_selecionado_chave,
+                    color_continuous_scale="Viridis",
+                    mapbox_style="carto-positron",
+                    zoom=4,
+                    center={"lat": centro.y, "lon": centro.x},
+                    opacity=0.7,
+                    hover_name="nome_municipio",
+                    hover_data={indicador_selecionado_chave: True},
+                    labels={indicador_selecionado_chave: indicador_selecionado_nome}
+                )
+                fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+                st.plotly_chart(fig_map, use_container_width=True)
+            except Exception as e:
+                st.error(f"Não foi possível gerar o mapa. Pode ser que a malha geográfica não esteja disponível para os municípios selecionados. Erro: {e}")
+
+# Para rodar a aplicação, salve o código e execute no terminal:
+# streamlit run app.py
+5.3 Apêndice: Implementação Alternativa com Plotly DashPara desenvolvedores que preferem uma estrutura mais explícita e escalável, a seguir está a implementação equivalente do mesmo dashboard usando Plotly Dash. Esta versão demonstra a arquitetura de callbacks, que é o coração da interatividade em Dash.36Código (dash_app.py):Pythonfrom dash import Dash, dcc, html, Input, Output
+import plotly.express as px
+import pandas as pd
+from ibge_client import IBGEClient, compilar_dados_municipais, adicionar_geometrias
+
+# --- Inicialização ---
+client = IBGEClient()
+df_municipios_total = client.get_lista_municipios('all')
+mapa_indicadores = {
+    "PIB per capita (2021)": "pib_per_capita",
+    "População Estimada (2021)": "populacao_estimada",
+    "Área Territorial (2022)": "area_territorial",
+    "Densidade Demográfica (2022)": "densidade_demografica_2022"
+}
+
+app = Dash(__name__)
+app.title = "Comparador de Municípios - IBGE (Dash)"
+
+# --- Layout da Aplicação ---
+app.layout = html.Div(children=,
+                value=['5205307', '5200509', '3550308'], # Default: Cavalcante, Alto Paraíso, SP
+                multi=True
+            ),
+        ]),
+        html.Div(,
+                value='pib_per_capita',
+                clearable=False
+            ),
+        ]),
+    ]),
+    html.Div(id='output-container', children=, type="circle"),
+    ])
+])
+
+# --- Callback para atualizar os gráficos e tabela ---
+@app.callback(
+    Output('table-and-bar-container', 'children'),
+    Output('map-container', 'children'),
+    Input('municipio-dropdown', 'value'),
+    Input('indicador-dropdown', 'value')
+)
+def update_visualizations(codigos_selecionados, indicador_chave):
+    if not codigos_selecionados or not indicador_chave:
+        return html.Div("Por favor, selecione municípios e um indicador."), ""
+
+    # Encontra o nome e período do indicador
+    indicador_nome = [k for k, v in mapa_indicadores.items() if v == indicador_chave]
+    periodo = indicador_nome.split('(')[-1].replace(')', '')
+    
+    # Busca e compila os dados
+    df_comparativo = compilar_dados_municipais(client, codigos_selecionados, {indicador_chave: periodo})
+
+    if df_comparativo.empty or indicador_chave not in df_comparativo.columns:
+        return html.Div(f"Não foi possível obter dados para '{indicador_nome}'."), ""
+
+    # Gera tabela e gráfico de barras
+    df_display = df_comparativo.sort_values(indicador_chave, ascending=False).reset_index()
+    fig_bar = px.bar(df_display, x='nome_municipio', y=indicador_chave, title=f"Comparativo de {indicador_nome}")
+    
+    table_bar_layout = html.Div()
+
+    # Gera mapa
+    try:
+        gdf_comparativo = adicionar_geometrias(df_comparativo)
+        gdf_proj = gdf_comparativo.to_crs(epsg=4326)
+        centro = gdf_proj.dissolve().centroid.iloc
+        fig_map = px.choropleth_mapbox(
+            gdf_comparativo, geojson=gdf_comparativo.geometry, locations=gdf_comparativo.index,
+            color=indicador_chave, mapbox_style="carto-positron", zoom=3.5,
+            center={"lat": centro.y, "lon": centro.x}, opacity=0.7, hover_name="nome_municipio"
+        )
+        fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        map_layout = html.Div([html.H3("Visualização Geográfica"), dcc.Graph(id='map-chart', figure=fig_map)])
+    except Exception:
+        map_layout = html.Div("Não foi possível gerar o mapa.")
+
+    return table_bar_layout, map_layout
+
+if __name__ == '__main__':
+    app.run_server(debug=True)
+ConclusãoEste relatório apresentou um guia completo e detalhado para a construção de uma solução de análise de dados municipais em Python, utilizando o ecossistema de APIs do IBGE. Foi demonstrado que, embora poderoso, este ecossistema é complexo e fragmentado, exigindo uma abordagem estratégica para ser utilizado de forma eficaz.Foram abordados e solucionados os três principais desafios inerentes a este projeto. Primeiro, a "lacuna semântica" entre as questões analíticas e os requisitos técnicos da API foi transposta através de uma metodologia de descoberta de códigos e, mais pragmaticamente, por meio de uma tabela de mapeamento direto para os indicadores mais comuns. Segundo, o ecossistema de bibliotecas Python fragmentado foi navegado com uma estratégia best-of-breed, combinando as forças de sidrapy, ibge e geobr para criar uma solução coesa. Terceiro, o desafio da federação de dados foi identificado, esclarecendo que o portal do IBGE agrega dados de fontes externas (como PNUD e DATASUS), o que define um escopo realista para o que pode ser alcançado apenas com as APIs do IBGE.O resultado final é um conjunto de códigos robustos e reutilizáveis, encapsulados em uma classe IBGEClient, e uma aplicação de dashboard interativo totalmente funcional, com implementações fornecidas tanto em Streamlit, para rapidez e simplicidade, quanto em Plotly Dash, para maior controle e escalabilidade.Recomendações para Aprimoramentos Futuros:Implantação na Nuvem: O próximo passo natural é tornar a aplicação acessível publicamente, utilizando plataformas como Streamlit Community Cloud, PythonAnywhere ou serviços de nuvem mais robustos como AWS, Google Cloud ou Azure.Integração de Fontes de Dados Adicionais: Para replicar mais fielmente o portal "Cidades e Estados", seria necessário desenvolver clientes de API para outras fontes, como o DATASUS (via pysus) e o Atlas de Desenvolvimento Humano do PNUD.Análise de Séries Temporais: A API SIDRA contém dados históricos para muitos indicadores. A aplicação poderia ser estendida para permitir a visualização e análise da evolução de um indicador ao longo do tempo para os municípios selecionados.Persistência de Dados: Para aplicações com alto volume de uso ou que necessitem de dados mais antigos, implementar um banco de dados local (como SQLite) ou um data warehouse para armazenar os dados baixados pode melhorar drasticamente o desempenho e reduzir a dependência de chamadas constantes à API.Este guia fornece a base sólida e o conhecimento aprofundado necessários para que desenvolvedores e analistas possam não apenas executar estas sugestões, mas também criar novas e inovadoras ferramentas de análise sobre a rica tapeçaria de dados que descreve o Brasil.

@@ -1,0 +1,65 @@
+/* Projeto Cerrado - Brand Components (MVP, sem build Tailwind) */
+
+:root {
+  --verde-profundo: #316836;
+  --azul-ceu-agua: #0070C0;
+  --amarelo-ipe: #FFD400;
+  --ocre-terra: #C8A05A;
+  --cinza-texto: #4a5568;
+  --cinza-claro: #f7fafc;
+}
+
+/* Acessibilidade: foco visível consistente */
+:where(a, button, [tabindex])/:focus-visible,
+:where(a, button, [tabindex]):focus-visible {
+  outline: 3px solid var(--amarelo-ipe);
+  outline-offset: 2px;
+  border-radius: .25rem;
+}
+
+/* Botões padrão da marca */
+.btn-primary {
+  background: var(--verde-profundo);
+  color: #fff;
+  border-radius: 9999px;
+  padding: .625rem 1.25rem;
+  font-weight: 700;
+  transition: transform .15s ease, background .15s ease;
+}
+.btn-primary:hover { background: var(--azul-ceu-agua); transform: scale(1.03); }
+
+.btn-outline {
+  border: 2px solid var(--verde-profundo);
+  color: var(--verde-profundo);
+  border-radius: 9999px;
+  padding: .5rem 1rem;
+  font-weight: 600;
+}
+.btn-outline:hover { border-color: var(--azul-ceu-agua); color: var(--azul-ceu-agua); }
+
+/* Cards padrão */
+.card { border: 1px solid #e5e7eb; border-radius: .75rem; padding: 1.25rem; background: #fff; }
+.card:hover { box-shadow: 0 10px 20px rgba(0,0,0,.06); }
+
+/* Títulos de seção com acento inovador */
+.section-title { position: relative; display: inline-block; }
+.section-title::after {
+  content: "";
+  position: absolute; left: 0; bottom: -6px; height: 6px; width: 60%;
+  background: linear-gradient(90deg, var(--amarelo-ipe), var(--ocre-terra));
+  border-radius: 8px;
+}
+
+/* Badges para estados */
+.badge { display: inline-block; border-radius: 9999px; padding: .25rem .5rem; font-size: .75rem; font-weight: 700; }
+.badge-info { background: #e6f2fb; color: var(--azul-ceu-agua); }
+.badge-success { background: #e9f7ef; color: #1e7b34; }
+.badge-warn { background: #fff8e1; color: #9a6d00; }
+
+/* Breadcrumbs */
+.breadcrumb { font-size: .875rem; color: #6b7280; }
+.breadcrumb a { color: var(--azul-ceu-agua); }
+.breadcrumb a:hover { text-decoration: underline; }
+
+/* Conteúdo pre formatado dentro de cards */
+.card pre { background: var(--cinza-claro); padding: .75rem; border-radius: .5rem; overflow-x: auto; }

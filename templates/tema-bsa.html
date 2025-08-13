@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Tema: Bens e Serviços Ambientais - Projeto Cerrado{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <nav class="breadcrumb mb-3" aria-label="breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a> / <a href="{{ url_for('temas') }}">Temas</a> / <span>Bens e Serviços Ambientais</span>
+    </nav>
+    <h1 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-2 section-title">Bens e Serviços Ambientais</h1>
+    <p class="mb-6">Valoração preliminar e indicadores (placeholder).</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="font-semibold mb-2">Indicadores</h3>
+        <ul class="list-disc list-inside text-sm">
+          <li>Indicadores-chaves de B&S</li>
+          <li>Métricas de valoração v0.1</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-2">Mapa Temático</h3>
+        <p>Embed do mapa filtrado por tema (placeholder).</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

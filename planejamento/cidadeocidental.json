@@ -1,0 +1,98 @@
+{
+    "identificacao": {
+      "nome_municipio": "Cidade Ocidental",
+      "uf": "GO",
+      "codigo_ibge": "5205497",
+      "fonte_info_administrativa": {
+        "nome": "IBGE Cidades",
+        "url": "https://www.ibge.gov.br/cidades-e-estados/go/cidade-ocidental.html"
+      }
+    },
+    "geografia_territorio": {
+      "area_territorial_km2": {
+        "valor": 389.985,
+        "ano_referencia": 2024,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/cidade-ocidental.html"
+      },
+      "bioma": {
+        "valor": "Cerrado",
+        "ano_referencia": 2020,
+        "fonte_nome": "InfoSanBas",
+        "fonte_url": "https://infosanbas.org.br/municipio/cidade-ocidental-go/"
+      }
+    },
+    "demografia": {
+      "populacao_censo_2022": {
+        "valor": 91767,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://www.cidadeocidental.go.gov.br/noticia/1219-censo-2022-cidade-ocidental--o-17-municpio-mais-populoso-do-estado-"
+      },
+      "populacao_censo_2010": {
+        "valor": 55915,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE - Censo 2010",
+        "fonte_url": "https://censo2010.ibge.gov.br/sinopse/index.php?uf=52"
+      },
+      "densidade_demografica_hab_km2": {
+        "valor": 235.31,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/cidade-ocidental.html"
+      }
+    },
+    "socioeconomia": {
+      "idhm_2010": {
+        "valor": 0.717,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE / PNUD",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/cidade-ocidental.html"
+      },
+      "pib_per_capita_reais": {
+        "valor": 336576000,
+        "observacao": "Valor do PIB total em milhares de reais, não per capita.",
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE / Meu Município",
+        "fonte_url": "https://meumunicipio.org.br/perfil-municipio/5205497-Cidade-Ocidental-GO"
+      },
+      "censo_agropecuario_2017": {
+        "numero_estabelecimentos": 228,
+        "area_total_estabelecimentos_ha": 24316,
+        "pessoal_ocupado": 635,
+        "area_lavouras_ha": 3535,
+        "area_pastagens_ha": 15344,
+        "fonte_nome": "IBGE - Censo Agropecuário 2017 (Plataforma SIDRA)",
+        "fonte_url": "https://sidra.ibge.gov.br/pesquisa/censo-agropecuario-2017/resultados-definitivos"
+      }
+    },
+    "cobertura_uso_solo": {
+      "dados_gerais": {
+        "ano_referencia": 2018,
+        "fonte_nome": "Projeto SanRural/UFG (Base MapBiomas)",
+        "fonte_url": "https://sanrural.ufg.br/wp-content/uploads/2018/04/DTM-Cidade_Ocidental_ISBN.pdf"
+      },
+      "classes": []
+    },
+    "governanca_planejamento": {
+      "plano_diretor": {
+        "existe": true,
+        "lei_referencia": "Lei nº 727 de 20/01/2009 (e revisões posteriores, como a Lei 1027/2016)",
+        "observacao": "Possui um arcabouço legal de planejamento urbano mais estruturado devido à intensa pressão de crescimento demográfico.",
+        "fonte_nome": "Prefeitura de Cidade Ocidental / Legislação",
+        "fonte_url": "https://leis.cidadeocidental.go.gov.br/leis/1444/lei-1027-2016"
+      }
+    },
+    "conflitos_pressoes": {
+      "crescimento_desordenado": {
+        "descricao": "Crescimento populacional explosivo (64,12% entre 2010-2022) impulsionado pela função de 'cidade-dormitório' da RIDE-DF, resultando em forte pressão sobre a infraestrutura e serviços.",
+        "fonte_nome": "Prefeitura de Cidade Ocidental / IBGE",
+        "fonte_url": "https://www.cidadeocidental.go.gov.br/noticia/1219-censo-2022-cidade-ocidental--o-17-municpio-mais-populoso-do-estado-"
+      },
+      "ocupacao_informal": {
+        "descricao": "A expansão urbana acelerada leva à proliferação de loteamentos irregulares e ocupação informal do solo, gerando bairros precários e degradação ambiental periurbana.",
+        "fonte_nome": "SciELO / Estudos Acadêmicos",
+        "fonte_url": "https://www.scielo.br/j/se/a/QKmwFP9NSwxQc6Vqdng3K8s/?format=pdf"
+      }
+    }
+  }

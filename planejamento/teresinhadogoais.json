@@ -1,0 +1,102 @@
+{
+    "identificacao": {
+      "nome_municipio": "Teresina de Goiás",
+      "uf": "GO",
+      "codigo_ibge": "5221080",
+      "fonte_info_administrativa": {
+        "nome": "IBGE Cidades",
+        "url": "https://cidades.ibge.gov.br/brasil/go/teresina-de-goias"
+      }
+    },
+    "geografia_territorio": {
+      "area_territorial_km2": {
+        "valor": 774.639,
+        "ano_referencia": 2018,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      },
+      "bioma": {
+        "valor": "Cerrado",
+        "ano_referencia": 2019,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      }
+    },
+    "demografia": {
+      "populacao_censo_2022": {
+        "valor": 2695,
+        "ano_referencia": 2022,
+        "observacao": "Dado da prévia do Censo 2022.",
+        "fonte_nome": "IBGE - Prévia do Censo 2022",
+        "fonte_url": "https://ftp.ibge.gov.br/Censos/Censo_Demografico_2022/Previa_da_Populacao/GO_POP2022.pdf"
+      },
+      "populacao_censo_2010": {
+        "valor": 3016,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE - Censo 2010",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      },
+      "densidade_demografica_hab_km2": {
+        "valor": 3.89,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE - Censo 2010",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      }
+    },
+    "socioeconomia": {
+      "idhm_2010": {
+        "valor": 0.661,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE / PNUD",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      },
+      "pib_per_capita_reais": {
+        "valor": 8934.51,
+        "ano_referencia": 2016,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      },
+      "censo_agropecuario_2017": {
+        "numero_estabelecimentos": 417,
+        "area_total_estabelecimentos_ha": 37643,
+        "pessoal_ocupado": 1096,
+        "area_lavouras_ha": 321,
+        "area_pastagens_ha": 11231,
+        "fonte_nome": "IBGE - Censo Agropecuário 2017 (Plataforma SIDRA)",
+        "fonte_url": "https://sidra.ibge.gov.br/pesquisa/censo-agropecuario-2017/resultados-definitivos"
+      }
+    },
+    "cobertura_uso_solo": {
+      "dados_gerais": {
+        "ano_referencia": 2018,
+        "fonte_nome": "Projeto SanRural/UFG (Base MapBiomas)",
+        "fonte_url": "https://sanrural.ufg.br/wp-content/uploads/2018/04/DTM-Teresina_Goias_ISBN.pdf"
+      },
+      "classes": [
+        {"classe": "Vegetação Nativa", "area_km2": 663.09, "percentual": 85.60},
+        {"classe": "Pastagem", "area_km2": 109.84, "percentual": 14.18},
+        {"classe": "Corpos Hídricos", "area_km2": 0.93, "percentual": 0.12},
+        {"classe": "Área Urbana", "area_km2": 0.70, "percentual": 0.09}
+      ]
+    },
+    "governanca_planejamento": {
+      "plano_diretor": {
+        "existe": false,
+        "observacao": "Não foram localizados documentos consolidados de um Plano Diretor municipal. A legislação de uso do solo é mais antiga e fragmentada.",
+        "fonte_nome": "Pesquisa em Diários Oficiais e Portais de Legislação",
+        "fonte_url": "https://teresinadegoias.go.leg.br/"
+      }
+    },
+    "conflitos_pressoes": {
+      "situacao_fundiaria": {
+        "descricao": "Parte integrante do Território Quilombola Kalunga, compartilhando os mesmos desafios de regularização fundiária e pressão de interesses externos.",
+        "fonte_nome": "Mapa de Conflitos - Fiocruz",
+        "fonte_url": "https://mapadeconflitos.ensp.fiocruz.br/conflito/go-comunidade-kalunga-quilombolas-ainda-em-busca-da-titulacao-plena-e-da-reconquista-de-suas-terras/"
+      },
+      "desmatamento": {
+        "descricao": "Embora com alta cobertura nativa, o município está na zona de influência do Parque Nacional da Chapada dos Veadeiros e sofre com queimadas e pressões agropecuárias no entorno.",
+        "fonte_nome": "Governo de Goiás / SEMAD",
+        "fonte_url": "https://goias.gov.br/meioambiente/wp-content/uploads/sites/33/2024/12/Versao-final-relatorio-incendios.pdf"
+      }
+    }
+  }

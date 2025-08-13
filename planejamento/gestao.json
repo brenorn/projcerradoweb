@@ -1,0 +1,16 @@
+[
+  {
+    "nome": "Cybele Bueno Rocha Rodrigues de Faria",
+    "papel": "Pesquisa, Desenvolvimento e Inovação (PD&I) A / Vice-Coordenadora",
+    "bio": "Mestrado em Governança e Inovação (UnB). MBA em Gestão da Inovação, Tecnologia e Empreendedorismo. Pós-graduações em Direito e Gestão Pública. Coordenadora e pesquisadora em projetos estratégicos da UnB (PDI_PISAC, Observatório de Práticas Integrativas). Experiência em gestão de projetos, recursos, finanças públicas e inovação.",
+    "lattes": "http://lattes.cnpq.br/3678187057033895",
+    "foto": "/static/imagens/professores/cybele-bueno-faria.jpg"
+  },
+  {
+    "nome": "Márcio Antônio Pereira de Alcântara",
+    "papel": "Apoio Técnico (PD&I) A",
+    "bio": "Graduação em Sistemas de Informação. Experiência em gestão administrativa e orçamentária na Direção da FT/UnB, incluindo emissão de passagens/diárias, execução de processos com recursos de diversas pró-reitorias, controle orçamentário e ordenação de despesas.",
+    "lattes": null,
+    "foto": "/static/imagens/professores/marcio-antonio-alcantara.jpg"
+  }
+]

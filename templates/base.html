@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Projeto Cerrado {% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'cerrado-verde-profundo': '#316836',
+                        'cerrado-azul-ceu-agua': '#0070C0',
+                        'cerrado-amarelo-ipe': '#FFD400',
+                        'cerrado-ocre-terra': '#C8A05A',
+                        'institucional-cinza': '#4a5568',
+                        'cinza-claro': '#f7fafc'
+                    },
+                    fontFamily: {
+                        'sans': ['Inter', 'sans-serif'],
+                        'display': ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/brand.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='imagens/logo_transparente.png') }}" />
+    <meta name="theme-color" content="#316836">
+    <meta name="description" content="Programa de Educação Ambiental e Formação Profissional para o Desenvolvimento Sustentável no bioma Cerrado.">
+    <meta property="og:title" content="Projeto Cerrado">
+    <meta property="og:description" content="Conhecimento que Transforma, Futuro que Floresce no Cerrado.">
+    <meta property="og:image" content="{{ url_for('static', filename='imagens/cerrado_hero_bg.jpg') }}">
+    <meta property="og:type" content="website">
+    <style>
+        .hero-bg {
+            background-image: url("{{ url_for('static', filename='imagens/cerrado_hero_bg.jpg') }}");
+            background-size: cover;
+            background-position: center;
+        }
+        /* Navegação superior: estado padrão e ativo */
+        .nav-link { padding-bottom: 6px; border-bottom: 2px solid transparent; transition: color 150ms ease, border-color 150ms ease; }
+        .nav-link:hover { color: #0070C0; border-bottom-color: rgba(0,112,192,0.25); }
+        .nav-link--active { color: #0070C0; border-bottom-color: #0070C0; }
+    </style>
+</head>
+<body class="bg-cinza-claro text-institucional-cinza font-sans">
+    <a href="#conteudo-principal" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:bg-white focus:text-black focus:px-3 focus:py-2 focus:rounded">Pular para conteúdo</a>
+
+    <!-- Header / Navegação -->
+    <header class="bg-white border-b shadow-sm sticky top-0 z-50 transition-all duration-300" role="banner">
+        <nav class="container mx-auto px-6 py-2 flex justify-between items-center" role="navigation" aria-label="Navegação principal">
+          <a href="{{ url_for('home') }}" class="flex items-center space-x-3">
+            <img src="{{ url_for('static', filename='imagens/logo_transparente.png') }}" class="h-16" alt="Cerrado em Rede Logo">
+            <span class="text-2xl font-bold font-display text-cerrado-verde-profundo">Projeto Cerrado</span>
+          </a>
+          <!-- Cabeçalho minimalista (desktop): Botão Menu + Buscar -->
+          <div class="hidden md:flex items-center space-x-4">
+            <button id="sidebar-toggle" class="inline-flex items-center gap-2 px-3 py-1.5 rounded border hover:bg-cinza-claro" title="Abrir menu">
+              <i class="fa-solid fa-bars"></i>
+              <span class="text-sm">Menu</span>
+            </button>
+            <button id="btn-search" class="inline-flex items-center gap-2 px-3 py-1.5 rounded border hover:bg-cinza-claro" title="Buscar (Ctrl/⌘+K)">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span class="text-sm">Buscar</span>
+              <span class="text-[10px] text-gray-500 border rounded px-1 ml-1">Ctrl K</span>
+            </button>
+          </div>
+          <div class="md:hidden">
+            <button id="mobile-menu-button" class="text-cerrado-verde-profundo focus:outline-none">
+              <i class="fas fa-bars fa-2x"></i>
+            </button>
+          </div>
+        </nav>
+        <!-- Menu Mobile -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t" role="navigation" aria-label="Navegação mobile">
+            <!-- Início: itens principais -->
+            <a href="{{ url_for('home') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua">Projeto Cerrado</a>
+            <!-- Removido: link 'O Programa' (#sobre) -->
+            <a href="{{ url_for('geoportal') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua {% if request.endpoint == 'geoportal' %}text-cerrado-azul-ceu-agua font-bold{% endif %}">Geoportal</a>
+            <a href="{{ url_for('home') }}#formacao" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua">Formação</a>
+            <a href="{{ url_for('home') }}#quem-somos" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua">Quem Somos</a>
+            <a href="{{ url_for('municipios') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua {% if request.endpoint == 'municipios' or request.endpoint == 'municipio_detalhe' %}text-cerrado-azul-ceu-agua font-bold{% endif %}">Municípios</a>
+            <a href="{{ url_for('dashboard') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua {% if request.endpoint == 'dashboard' %}text-cerrado-azul-ceu-agua font-bold{% endif %}">Dashboard</a>
+            <a href="{{ url_for('temas') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua {% if request.endpoint in ['temas','tema_saneamento','tema_recursos_hidricos','tema_uso_terra','tema_bsa'] %}text-cerrado-azul-ceu-agua font-bold{% endif %}">Temas</a>
+            <a href="{{ url_for('cursos') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua {% if request.endpoint == 'cursos' %}text-cerrado-azul-ceu-agua font-bold{% endif %}">Cursos</a>
+            
+            <a href="{{ url_for('equipe') }}" class="block py-3 px-6 text-lg font-semibold hover:bg-cinza-claro hover:text-cerrado-azul-ceu-agua {% if request.endpoint == 'equipe' %}text-cerrado-azul-ceu-agua font-bold{% endif %}">Equipe</a>
+            <a href="{{ url_for('home') }}#contato" class="block py-3 px-6"><span class="btn-outline inline-block">Contato</span></a>
+        </div>
+    </header>
+
+    
+
+    <!-- Sidebar off-canvas (desktop e mobile) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white border-r shadow-lg -translate-x-full transition-transform duration-200 z-40 pt-20">
+        <nav aria-label="Navegação lateral" class="px-2">
+            <div class="flex justify-end pr-2 mb-2">
+                <button id="sidebar-close" class="inline-flex items-center justify-center w-8 h-8 rounded border hover:bg-cinza-claro" aria-label="Fechar menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <ul class="space-y-1">
+                <!-- Início: itens principais -->
+                <li><a href="{{ url_for('home') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint == 'home' %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-house w-5 text-gray-500"></i><span>Projeto Cerrado</span></a></li>
+                <li><a href="{{ url_for('home') }}#quem-somos" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro"><i class="fa-solid fa-users w-5 text-gray-500"></i><span>Quem Somos</span></a></li>
+                <!-- Removido: item lateral 'O Programa' (#sobre) -->
+                <li><a href="{{ url_for('geoportal') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint == 'geoportal' %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-globe w-5 text-gray-500"></i><span>Geoportal</span></a></li>
+                <li><a href="{{ url_for('municipios') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint == 'municipios' or request.endpoint == 'municipio_detalhe' %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-map w-5 text-gray-500"></i><span>Municípios</span></a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint == 'dashboard' %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-chart-line w-5 text-gray-500"></i><span>Dashboard</span></a></li>
+                <li><a href="{{ url_for('temas') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint in ['temas','tema_saneamento','tema_recursos_hidricos','tema_uso_terra','tema_bsa'] %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-layer-group w-5 text-gray-500"></i><span>Temas</span></a></li>
+                <li><a href="{{ url_for('cursos') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint == 'cursos' %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-graduation-cap w-5 text-gray-500"></i><span>Cursos</span></a></li>
+                
+                <li><a href="{{ url_for('equipe') }}" class="flex items-center gap-3 px-3 py-2 rounded hover:bg-cinza-claro {% if request.endpoint == 'equipe' %}bg-cinza-claro text-cerrado-azul-ceu-agua font-semibold{% endif %}"><i class="fa-solid fa-people-group w-5 text-gray-500"></i><span>Equipe</span></a></li>
+            </ul>
+        </nav>
+    </aside>
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/30 hidden z-30"></div>
+    <!-- Aba fixa (desktop) para abrir menu por hover -->
+    <div id="mainmenu-trigger" class="hidden md:flex fixed top-1/2 -translate-y-1/2 left-0 z-30">
+        <div class="rounded-r-lg shadow border bg-white text-sm px-2 py-3 cursor-pointer hover:bg-cinza-claro" title="Menu">
+            Menu
+        </div>
+    </div>
+
+    <!-- Main Content: largura total -->
+    <div class="container mx-auto px-6 py-4">
+        <main id="conteudo-principal" role="main" class="min-w-0">
+            {% block subnav %}{% endblock %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-cerrado-verde-profundo text-white">
+        <div class="container mx-auto px-6 py-10">
+            <div class="grid md:grid-cols-3 gap-8 text-center md:text-left">
+                <div>
+                    <h3 class="text-xl font-bold font-display mb-4">Projeto Cerrado</h3>
+                    <p class="text-gray-300">Conhecimento que Transforma, Futuro que Floresce no Cerrado.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold font-display mb-4">Navegação</h3>
+                    <ul class="space-y-2">
+                        <!-- Removido: link de rodapé 'O Programa' (#sobre) -->
+                        <li><a href="{{ url_for('geoportal') }}" class="hover:text-cerrado-amarelo-ipe">Geoportal</a></li>
+                        <li><a href="{{ url_for('home') }}#formacao" class="hover:text-cerrado-amarelo-ipe">Formação</a></li>
+                        <li><a href="{{ url_for('home') }}#quem-somos" class="hover:text-cerrado-amarelo-ipe">Quem Somos</a></li>
+                        <li><a href="{{ url_for('municipios') }}" class="hover:text-cerrado-amarelo-ipe">Municípios</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" class="hover:text-cerrado-amarelo-ipe">Dashboard</a></li>
+                        <li><a href="{{ url_for('temas') }}" class="hover:text-cerrado-amarelo-ipe">Temas</a></li>
+                        <li><a href="{{ url_for('cursos') }}" class="hover:text-cerrado-amarelo-ipe">Cursos</a></li>
+                        
+                        <li><a href="{{ url_for('equipe') }}" class="hover:text-cerrado-amarelo-ipe">Equipe</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold font-display mb-4">Contato</h3>
+                    <p class="text-gray-300 mb-3">
+                        <i class="fas fa-envelope mr-2"></i>
+                        <a href="mailto:projetocerradoft@gmail.com" class="hover:text-cerrado-amarelo-ipe">projetocerradoft@gmail.com</a>
+                    </p>
+                    <div class="flex justify-center md:justify-start space-x-4">
+                        <a href="https://www.instagram.com/cerradoemredeoficial" target="_blank" class="text-2xl hover:text-cerrado-amarelo-ipe transition-transform transform hover:scale-110"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p>&copy; 2025 Projeto Cerrado. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Lógica para o menu mobile (agora abre a sidebar)
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebarClose = document.getElementById('sidebar-close');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const mainmenuTrigger = document.getElementById('mainmenu-trigger');
+        const openSidebar = () => { sidebar.classList.remove('-translate-x-full'); sidebarOverlay.classList.remove('hidden'); };
+        const closeSidebar = () => { sidebar.classList.add('-translate-x-full'); sidebarOverlay.classList.add('hidden'); };
+        if (mobileMenuButton) mobileMenuButton.addEventListener('click', () => { openSidebar(); if (mobileMenu && !mobileMenu.classList.contains('hidden')) mobileMenu.classList.add('hidden'); });
+
+        // Sidebar off-canvas (desktop)
+        if (sidebarToggle) sidebarToggle.addEventListener('click', openSidebar);
+        if (sidebarClose) sidebarClose.addEventListener('click', closeSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+        // Abrir ao passar o mouse na aba e fechar ao sair
+        if (mainmenuTrigger && sidebar) {
+            let inside = false;
+            const openOnHover = () => openSidebar();
+            mainmenuTrigger.addEventListener('mouseenter', openOnHover);
+            mainmenuTrigger.addEventListener('focus', openOnHover);
+            sidebar.addEventListener('mouseenter', () => { inside = true; });
+            sidebar.addEventListener('mouseleave', () => {
+                inside = false;
+                setTimeout(() => { if (!inside) closeSidebar(); }, 80);
+            });
+            mainmenuTrigger.addEventListener('mouseleave', () => {
+                setTimeout(() => { if (!inside) closeSidebar(); }, 80);
+            });
+        }
+        // Fecha com ESC
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeSidebar(); closeSearch(); } });
+
+        // --------- Busca Global (modal simples) ---------
+        const searchModal = document.getElementById('search-modal');
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchInput = document.getElementById('search-input');
+        const btnSearch = document.getElementById('btn-search');
+        function openSearch(){ if (searchModal){ searchModal.classList.remove('hidden'); searchOverlay.classList.remove('hidden'); setTimeout(()=>searchInput&&searchInput.focus(), 50);} }
+        function closeSearch(){ if (searchModal){ searchModal.classList.add('hidden'); searchOverlay.classList.add('hidden'); } }
+        if (btnSearch) btnSearch.addEventListener('click', openSearch);
+        document.addEventListener('keydown', (e)=>{
+          const isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+          if ((isMac && e.metaKey && e.key.toLowerCase()==='k') || (!isMac && e.ctrlKey && e.key.toLowerCase()==='k')) { e.preventDefault(); openSearch(); }
+        });
+        if (searchOverlay) searchOverlay.addEventListener('click', closeSearch);
+    </script>
+    <!-- Modal de busca -->
+    <div id="search-overlay" class="fixed inset-0 bg-black/30 hidden z-40"></div>
+    <div id="search-modal" class="hidden fixed inset-0 z-50 flex items-start justify-center pt-24">
+      <div class="w-full max-w-2xl mx-4 bg-white border shadow-xl rounded-lg overflow-hidden">
+        <div class="p-3 border-b flex items-center gap-2">
+          <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
+          <input id="search-input" type="text" placeholder="Busque por município, tema ou página" class="w-full outline-none py-2" />
+          <button onclick="(function(){ const m=document.getElementById('search-modal'); const o=document.getElementById('search-overlay'); if(m){m.classList.add('hidden');} if(o){o.classList.add('hidden');} })()" class="px-2 py-1 text-sm border rounded hover:bg-cinza-claro">Fechar</button>
+        </div>
+        <div class="p-3 grid md:grid-cols-2 gap-3 text-sm">
+          <div>
+            <div class="font-semibold mb-1">Páginas</div>
+            <ul class="space-y-1">
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('home') }}">Início</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('municipios') }}">Municípios</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('dashboard') }}">Dashboard</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('geoportal') }}">Geoportal</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('temas') }}">Temas</a></li>
+            </ul>
+          </div>
+          <div>
+            <div class="font-semibold mb-1">Temas</div>
+            <ul class="space-y-1">
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('tema_saneamento') }}">Saneamento</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('tema_recursos_hidricos') }}">Recursos Hídricos</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('tema_uso_terra') }}">Uso do Solo</a></li>
+              <li><a class="block px-2 py-1 rounded hover:bg-cinza-claro" href="{{ url_for('tema_bsa') }}">B&S Ambientais</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

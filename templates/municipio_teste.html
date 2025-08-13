@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Município (Teste IBGE){% endblock %}
+
+{% block subnav %}
+<nav class="mb-4 -mt-2">
+  <ul class="flex flex-wrap gap-2 text-sm">
+    <li><a href="{{ url_for('municipios') }}" class="px-3 py-1 rounded border hover:bg-cinza-claro">Voltar a Municípios</a></li>
+  </ul>
+  <hr class="mt-3" />
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-6">
+  <div class="bg-white p-6 rounded shadow">
+    <h1 class="text-2xl font-bold mb-2">Município (Teste IBGE)</h1>
+    <p class="text-sm text-gray-600 mb-4">Código IBGE: <span id="cod"></span></p>
+
+    <div id="box-status" class="text-sm text-gray-600 mb-4">Carregando dados do IBGE...</div>
+
+    <div class="grid md:grid-cols-3 gap-4">
+      <div class="border rounded p-4">
+        <div class="text-gray-500">Nome</div>
+        <div id="nome" class="text-lg font-semibold">—</div>
+      </div>
+      <div class="border rounded p-4">
+        <div class="text-gray-500">UF</div>
+        <div id="uf" class="text-lg font-semibold">—</div>
+      </div>
+      <div class="border rounded p-4">
+        <div class="text-gray-500">Fonte</div>
+        <div id="fonte" class="text-lg font-semibold">—</div>
+      </div>
+    </div>
+
+    <h2 class="text-xl font-semibold mt-6 mb-2">Indicadores (placeholder)</h2>
+    <div class="grid md:grid-cols-3 gap-4 text-sm">
+      <div class="border rounded p-4">
+        <div class="text-gray-500">População</div>
+        <div id="populacao" class="text-lg font-semibold">—</div>
+      </div>
+      <div class="border rounded p-4">
+        <div class="text-gray-500">Área (km²)</div>
+        <div id="area" class="text-lg font-semibold">—</div>
+      </div>
+      <div class="border rounded p-4">
+        <div class="text-gray-500">Densidade</div>
+        <div id="densidade" class="text-lg font-semibold">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const codigo = '{{ codigo_ibge }}';
+    document.getElementById('cod').textContent = codigo;
+    const statusBox = document.getElementById('box-status');
+
+    try {
+      const resp = await fetch(`/api/municipio_ibge/${codigo}`);
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(data?.error || 'Falha ao consultar API interna');
+
+      document.getElementById('nome').textContent = data?.nome ?? '—';
+      document.getElementById('uf').textContent = data?.uf ?? '—';
+      document.getElementById('fonte').textContent = data?.fonte ?? '—';
+
+      const ind = data?.indicadores || {};
+      document.getElementById('populacao').textContent = ind?.populacao ?? '—';
+      document.getElementById('area').textContent = ind?.area_km2 ?? '—';
+      document.getElementById('densidade').textContent = ind?.densidade ?? '—';
+
+      statusBox.textContent = 'Dados carregados com sucesso.';
+      statusBox.className = 'text-sm text-green-600 mb-4';
+    } catch (err) {
+      statusBox.textContent = `Erro: ${err.message}`;
+      statusBox.className = 'text-sm text-red-600 mb-4';
+    }
+  });
+</script>
+{% endblock %}

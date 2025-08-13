@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+
+{% block title %}Município - Projeto Cerrado{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <nav class="breadcrumb mb-3" aria-label="breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a> / <a href="{{ url_for('municipios') }}">Municípios</a> / <span>{{ slug }}</span>
+    </nav>
+    <h1 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-1 section-title">{{ municipio.nome if municipio else 'Município' }}</h1>
+    <p class="text-gray-600 mb-6">
+      {% if municipio %}
+        <span class="mr-4">UF: <span class="font-semibold">{{ municipio.uf }}</span></span>
+        <span class="mr-4">IBGE: <span class="font-mono">{{ municipio.codigo_ibge }}</span></span>
+        <span class="text-xs align-middle px-2 py-1 border rounded bg-cinza-claro">slug: {{ municipio.slug }}</span>
+      {% else %}
+        <span class="font-mono">{{ slug }}</span>
+      {% endif %}
+    </p>
+
+    <div class="grid md:grid-cols-12 gap-6">
+      <!-- Aba fixa para abrir Sumário (off-canvas) ao passar o mouse) -->
+      <div class="md:col-span-3"></div>
+      <div id="toc-trigger" class="hidden md:flex fixed top-1/2 -translate-y-1/2 left-0 z-40">
+        <div class="rounded-r-lg shadow border bg-white text-sm px-2 py-3 cursor-pointer hover:bg-cinza-claro" title="Sumário">
+          Sumário
+        </div>
+      </div>
+
+      <!-- Off-canvas TOC -->
+      <div id="toc-overlay" class="fixed inset-0 bg-black/30 z-40 hidden"></div>
+      <aside id="toc-panel" class="fixed z-50 top-0 left-0 h-full w-80 max-w-[85vw] -translate-x-full transition-transform duration-200">
+        <div class="h-full bg-white border-r shadow-lg flex flex-col">
+          <div class="flex items-center justify-between p-3 border-b">
+            <h2 class="text-sm font-semibold text-gray-700">Sumário</h2>
+            <button id="btn-close-toc" class="px-2 py-1 text-sm border rounded hover:bg-cinza-claro">Fechar</button>
+          </div>
+          <nav id="toc" class="p-2 overflow-y-auto">
+            <ul class="space-y-1 text-sm">
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#saneamento">Saneamento</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#visao-geral">Visão Geral</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#recursos-hidricos">Recursos Hídricos</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#uso-terra">Uso da Terra</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#bsa">B&S Ambientais</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#cultura">Cultura & Memória</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#documentos">Documentos</a></li>
+              <li><a class="toc-link block px-2 py-1 rounded hover:bg-cinza-claro" href="#acoes">Ações</a></li>
+            </ul>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Conteúdo principal -->
+      <div class="md:col-span-9">
+        <!-- Sumário compacto (mobile) -->
+        <div class="md:hidden mb-4">
+          <label for="sumario-mobile" class="sr-only">Sumário</label>
+          <select id="sumario-mobile" class="w-full border rounded px-3 py-2">
+            <option value="#saneamento">Saneamento</option>
+            <option value="#visao-geral">Visão Geral</option>
+            <option value="#recursos-hidricos">Recursos Hídricos</option>
+            <option value="#uso-terra">Uso da Terra</option>
+            <option value="#bsa">B&S Ambientais</option>
+            <option value="#cultura">Cultura & Memória</option>
+            <option value="#documentos">Documentos</option>
+            <option value="#acoes">Ações</option>
+          </select>
+        </div>
+
+        <div class="border rounded-lg p-6 bg-white">
+          <div class="flex justify-end mb-4">
+            <button id="btn-mostrar-todas" class="hidden text-sm px-3 py-1 border rounded hover:bg-cinza-claro">Exibir todas as seções</button>
+          </div>
+          <div id="visao-geral" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Visão Geral</h2>
+            {% if dem %}
+              <p><span class="font-semibold">População ({{ dem.ano }}):</span> {{ dem.populacao or '—' }}</p>
+            {% endif %}
+            {% if geo %}
+              <p><span class="font-semibold">Área territorial ({{ geo.ano_referencia }}):</span> {{ geo.area_km2 or '—' }} km²</p>
+            {% endif %}
+            {% if soc %}
+              <p><span class="font-semibold">IDHM ({{ soc.ano }}):</span> {{ soc.idhm or '—' }}</p>
+              <p><span class="font-semibold">PIB per capita ({{ soc.ano }}):</span> R$ {{ soc.pib_per_capita_reais or '—' }}</p>
+            {% endif %}
+            {% if not (dem or geo or soc) %}
+              <p>KPIs resumo do município (placeholder).</p>
+            {% endif %}
+          </div>
+          <div id="saneamento" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-4 section-title">Saneamento</h2>
+            <div class="grid sm:grid-cols-3 gap-4">
+              <div class="p-4 border rounded bg-white">
+                <div class="text-sm text-gray-600">Cobertura de água</div>
+                <div class="text-2xl font-bold">—%</div>
+                <div class="text-[11px] text-gray-500 mt-1">Fonte: SNIS</div>
+              </div>
+              <div class="p-4 border rounded bg-white">
+                <div class="text-sm text-gray-600">Cobertura de esgoto</div>
+                <div class="text-2xl font-bold">—%</div>
+                <div class="text-[11px] text-gray-500 mt-1">Fonte: SNIS</div>
+              </div>
+              <div class="p-4 border rounded bg-white">
+                <div class="text-sm text-gray-600">ETEs operantes</div>
+                <div class="text-2xl font-bold">—</div>
+                <div class="text-[11px] text-gray-500 mt-1">Fonte: Municipal/SNIS</div>
+              </div>
+            </div>
+            <p class="mt-3 text-sm text-gray-600">Metodologia e notas técnicas serão exibidas aqui.</p>
+          </div>
+          <div id="recursos-hidricos" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Recursos Hídricos</h2>
+            <p>Corpos d'água e qualidade (placeholder).</p>
+          </div>
+          <div id="uso-terra" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Uso e Ocupação da Terra</h2>
+            {% if cob_resumo and cob_classes %}
+              <p class="mb-2">Ano de referência: {{ cob_resumo.ano_referencia }}</p>
+              <ul class="list-disc ml-6">
+                {% for c in cob_classes %}
+                  <li>{{ c.classe }} — {{ c.percentual or '—' }}%</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>Classes e mudanças (placeholder).</p>
+            {% endif %}
+          </div>
+          <div id="bsa" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Bens e Serviços Ambientais</h2>
+            <p>Valoração preliminar e indicadores (placeholder).</p>
+          </div>
+          <div id="cultura" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Cultura & Memória</h2>
+            <p>Registros e elementos simbólicos (placeholder).</p>
+          </div>
+          <div id="documentos" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Documentos</h2>
+            <p>Relatórios e legislação local (placeholder).</p>
+          </div>
+          <div id="acoes" class="mb-8 scroll-mt-24">
+            <h2 class="text-2xl font-bold mb-2 section-title">Ações e Recomendações</h2>
+            <p>Boas práticas e plano sugerido (placeholder).</p>
+          </div>
+          <div class="mt-6 p-4 bg-cinza-claro rounded">
+            <h3 class="font-semibold mb-2">O que está sendo pesquisado</h3>
+            <div class="flex flex-wrap gap-2">
+              <span class="badge badge-info">coleta</span>
+              <span class="badge badge-warn">análise</span>
+              <span class="badge badge-success">publicado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+  // Scroll suave no select mobile
+  const select = document.getElementById('sumario-mobile');
+  if (select) {
+    select.addEventListener('change', (e) => {
+      const id = e.target.value;
+      const el = document.querySelector(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  // Scrollspy simples: observa seções e destaca link correspondente
+  const sections = document.querySelectorAll('#visao-geral, #saneamento, #recursos-hidricos, #uso-terra, #bsa, #cultura, #documentos, #acoes');
+  const links = document.querySelectorAll('#toc .toc-link');
+  const map = {};
+  links.forEach(l => { map[l.getAttribute('href')] = l; });
+
+  const setActive = (hash) => {
+    links.forEach(l => l.classList.remove('text-cerrado-azul-ceu-agua','font-semibold','bg-cinza-claro'));
+    const active = map[hash];
+    if (active) active.classList.add('text-cerrado-azul-ceu-agua','font-semibold','bg-cinza-claro');
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        setActive('#'+entry.target.id);
+      }
+    });
+  }, { rootMargin: '-40% 0px -50% 0px', threshold: 0.01 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Clique no TOC com rolagem suave
+  links.forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      if (!target) return;
+      // Mostrar somente a seção clicada
+      sections.forEach(sec => {
+        if (sec === target) {
+          sec.style.display = '';
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+      // Mostrar botão para reexibir tudo
+      const showAllBtn = document.getElementById('btn-mostrar-todas');
+      if (showAllBtn) showAllBtn.classList.remove('hidden');
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Botão para exibir todas as seções novamente
+  const showAllBtn = document.getElementById('btn-mostrar-todas');
+  if (showAllBtn) {
+    showAllBtn.addEventListener('click', () => {
+      sections.forEach(sec => sec.style.display = '');
+      showAllBtn.classList.add('hidden');
+      window.scrollTo({ top: document.getElementById('visao-geral').offsetTop - 80, behavior: 'smooth' });
+    });
+  }
+
+  // Off-canvas abrir ao passar o mouse e fechar ao sair
+  const panel = document.getElementById('toc-panel');
+  const overlay = document.getElementById('toc-overlay');
+  const trigger = document.getElementById('toc-trigger');
+
+  const openPanel = () => {
+    if (!panel) return;
+    panel.style.transform = 'translateX(0)';
+    if (overlay) overlay.classList.remove('hidden');
+  };
+  const closePanel = () => {
+    if (!panel) return;
+    panel.style.transform = 'translateX(-100%)';
+    if (overlay) overlay.classList.add('hidden');
+  };
+
+  if (trigger && panel) {
+    let inside = false;
+    trigger.addEventListener('mouseenter', openPanel);
+    trigger.addEventListener('focus', openPanel);
+    panel.addEventListener('mouseenter', () => { inside = true; });
+    panel.addEventListener('mouseleave', () => {
+      inside = false;
+      setTimeout(() => { if (!inside) closePanel(); }, 80);
+    });
+    trigger.addEventListener('mouseleave', () => {
+      setTimeout(() => { if (!inside) closePanel(); }, 80);
+    });
+  }
+  // Fecha em clique no overlay ou ESC
+  if (overlay) overlay.addEventListener('click', closePanel);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+</script>
+{% endblock %}

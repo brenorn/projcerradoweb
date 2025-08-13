@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Projeto Cerrado - Geoportal{% endblock %}
+
+{% block content %}
+    <section id="geoportal-intro" class="py-20 bg-white">
+        <div class="container mx-auto px-6 text-center">
+            <h1 class="text-5xl font-bold font-display text-cerrado-verde-profundo">Geoportal Interativo</h1>
+            <p class="text-xl text-institucional-cinza mt-4 max-w-3xl mx-auto">Explore dados e informações geoespaciais sobre o bioma Cerrado. Uma ferramenta poderosa para pesquisa, planejamento e tomada de decisão.</p>
+        </div>
+    </section>
+
+    <section id="geoportal-categorias" class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold font-display text-cerrado-verde-profundo text-center mb-12">Categorias de Dados</h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Categoria 1 -->
+                <div class="bg-white p-8 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="text-cerrado-azul-ceu-agua mb-4"><i class="fas fa-users fa-3x"></i></div>
+                    <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Dados Socioeconômicos</h3>
+                    <p class="leading-relaxed">Informações sobre demografia, atividades econômicas, e infraestrutura nas regiões do Cerrado.</p>
+                </div>
+                <!-- Categoria 2 -->
+                <div class="bg-white p-8 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="text-cerrado-verde-profundo mb-4"><i class="fas fa-leaf fa-3x"></i></div>
+                    <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Vegetação e Uso do Solo</h3>
+                    <p class="leading-relaxed">Mapas de cobertura vegetal, tipos de vegetação, áreas de desmatamento e de conservação do bioma.</p>
+                </div>
+                <!-- Categoria 3 -->
+                <div class="bg-white p-8 rounded-lg shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300">
+                    <div class="text-cerrado-ocre-terra mb-4"><i class="fas fa-map-marked-alt fa-3x"></i></div>
+                    <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Dados Físicos e Políticos</h3>
+                    <p class="leading-relaxed">Limites de municípios, estados, unidades de conservação, terras indígenas e dados de relevo e hidrografia.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Placeholder for the interactive map -->
+    <section id="mapa-interativo" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold font-display text-cerrado-verde-profundo text-center mb-12">Mapa Interativo</h2>
+            <div class="bg-gray-200 rounded-lg shadow-lg w-full h-[600px] flex items-center justify-center">
+                <p class="text-xl text-gray-500">O mapa interativo (Leaflet.js) será implementado aqui.</p>
+            </div>
+        </div>
+    </section>
+{% endblock %}

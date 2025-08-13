@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Municípios - Projeto Cerrado{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <nav class="breadcrumb mb-3" aria-label="breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a> / <span>Municípios</span>
+    </nav>
+    <h1 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-2 section-title">Municípios</h1>
+    <p class="mb-8 text-lg">Lista de municípios do projeto com indicadores principais.</p>
+
+    {% if municipios %}
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {% for m in municipios %}
+      {% set nome = m.nome if m.nome is defined else m['nome'] %}
+      {% set uf = m.uf if m.uf is defined else m['uf'] %}
+      {% set codigo = m.codigo_ibge if m.codigo_ibge is defined else m['codigo_ibge'] %}
+      {% set slug = m.slug if m.slug is defined else m['slug'] %}
+      {% set area = m.area_km2 if m.area_km2 is defined else m.get('area_km2') %}
+      {% set bioma = m.bioma if m.bioma is defined else m.get('bioma') %}
+      {% set pop = m.populacao if m.populacao is defined else m.get('populacao') %}
+      {% set idhm = m.idhm if m.idhm is defined else m.get('idhm') %}
+      {% set pibpc = m.pib_per_capita_reais if m.pib_per_capita_reais is defined else m.get('pib_per_capita_reais') %}
+      {% set plano = m.plano_diretor if m.plano_diretor is defined else m.get('plano_diretor') %}
+
+      <a href="{{ url_for('municipio_detalhe', slug=slug) }}" class="block border rounded-lg bg-white p-4 hover:shadow-lg hover:-translate-y-0.5 transition">
+        <div class="flex items-baseline justify-between">
+          <h3 class="text-xl font-bold">{{ nome }} <span class="font-normal text-gray-600">({{ uf }})</span></h3>
+          <span class="text-[11px] text-gray-500">IBGE {{ codigo }}</span>
+        </div>
+        <div class="mt-3 grid grid-cols-2 gap-2 text-sm">
+          {% if pop %}<div><span class="font-semibold">População:</span> {{ '{:,}'.format(pop)|replace(',', '.') }}</div>{% endif %}
+          {% if area %}<div><span class="font-semibold">Área (km²):</span> {{ area }}</div>{% endif %}
+          {% if idhm %}<div><span class="font-semibold">IDHM (2010):</span> {{ idhm }}</div>{% endif %}
+          {% if pibpc %}<div><span class="font-semibold">PIB per capita (R$):</span> {{ pibpc }}</div>{% endif %}
+          {% if bioma %}<div><span class="font-semibold">Bioma:</span> {{ bioma }}</div>{% endif %}
+          {% if plano is not none %}<div><span class="font-semibold">Plano Diretor:</span> {{ 'Sim' if plano else 'Não' }}</div>{% endif %}
+        </div>
+        <div class="mt-3 flex items-center justify-between">
+          <div class="flex gap-2 text-xs">
+            {% if idhm %}<span class="px-2 py-0.5 rounded border text-gray-600">IDHM</span>{% endif %}
+            {% if pop %}<span class="px-2 py-0.5 rounded border text-gray-600">Pop</span>{% endif %}
+            {% if pibpc %}<span class="px-2 py-0.5 rounded border text-gray-600">PIB pc</span>{% endif %}
+          </div>
+          <span class="text-[11px] text-gray-500">Fonte: planejamento</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+      <div class="p-6 border rounded bg-white">
+        <p class="text-gray-600">Nenhum município cadastrado ainda. Execute o ETL para carregar os dados.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

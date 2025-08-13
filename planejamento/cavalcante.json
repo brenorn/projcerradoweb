@@ -1,0 +1,110 @@
+{
+    "identificacao": {
+      "nome_municipio": "Cavalcante",
+      "uf": "GO",
+      "codigo_ibge": "5205307",
+      "fonte_info_administrativa": {
+        "nome": "IBGE Cidades",
+        "url": "https://www.ibge.gov.br/cidades-e-estados/go/cavalcante.html"
+      }
+    },
+    "geografia_territorio": {
+      "area_territorial_km2": {
+        "valor": 6948.780,
+        "ano_referencia": 2024,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/cavalcante.html"
+      },
+      "bioma": {
+        "valor": "Cerrado",
+        "ano_referencia": 2019,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://teresinadegoias.go.leg.br/dados-ibge/"
+      },
+      "unidades_de_conservacao": []
+    },
+    "demografia": {
+      "populacao_censo_2022": {
+        "valor": 9589,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://opopular.com.br/cidades/cavalcante-e-um-dos-cinco-municipios-do-pais-com-mais-da-metade-da-populac-o-declarada-quilombola-1.3051492"
+      },
+      "densidade_demografica_hab_km2": {
+        "valor": 1.38,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/cavalcante.html"
+      },
+      "populacao_quilombola": {
+        "valor": 5473,
+        "percentual_total": 57.08,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://cavalcante.go.gov.br/cavalcante-e-a-terceira-cidade-no-pais-com-a-maior-proporcao-de-moradores-quilombolas-no-entorno-do-distrito-federal-de-acordo-com-a-edicao-2022-do-censo-demografico-do-instituto-brasileiro-de-geogr/"
+      }
+    },
+    "socioeconomia": {
+      "idhm_2010": {
+        "valor": 0.584,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE / PNUD",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/cavalcante.html"
+      },
+      "pib_per_capita_reais": {
+        "valor": 25562.28,
+        "ano_referencia": 2015,
+        "fonte_nome": "IBGE / Brasil Central",
+        "fonte_url": "http://www.brasilcentral.go.gov.br/amc/dgmun.php?loc_cod=520530"
+      },
+      "censo_agropecuario_2017": {
+        "numero_estabelecimentos": 1937,
+        "area_total_estabelecimentos_ha": 250781,
+        "pessoal_ocupado": 5341,
+        "area_lavouras_ha": 1838,
+        "area_pastagens_ha": 63858,
+        "fonte_nome": "IBGE - Censo Agropecuário 2017 (Plataforma SIDRA)",
+        "fonte_url": "https://censoagro2017.ibge.gov.br/resultados-censo-agro-2017.html"
+      }
+    },
+    "cobertura_uso_solo": {
+      "dados_gerais": {
+        "ano_referencia": 2018,
+        "fonte_nome": "Projeto SanRural/UFG (Base MapBiomas)",
+        "fonte_url": "https://sanrural.ufg.br/wp-content/uploads/2018/04/DTM-Cavalcante_ISBN.pdf"
+      },
+      "classes": [
+        {"classe": "Vegetação Nativa", "area_km2": 6382.77, "percentual": 91.79},
+        {"classe": "Pastagem", "area_km2": 491.62, "percentual": 7.07},
+        {"classe": "Corpos Hídricos", "area_km2": 69.54, "percentual": 1.00},
+        {"classe": "Agricultura", "area_km2": 7.65, "percentual": 0.11},
+        {"classe": "Área Urbana", "area_km2": 1.39, "percentual": 0.02}
+      ]
+    },
+    "governanca_planejamento": {
+      "plano_diretor": {
+        "existe": true,
+        "lei_referencia": "Lei nº 1071 de 19/10/2012 (em processo de revisão)",
+        "observacao": "O Plano Diretor reconhece formalmente as comunidades Kalunga como parte do território municipal.",
+        "fonte_nome": "Câmara Municipal de Cavalcante",
+        "fonte_url": "https://cavalcante.go.leg.br/wp-content/uploads/2024/01/Ata-da-Audiencia-Publica-pra-discussao-do-Plano-Diretor-Municipal.pdf"
+      }
+    },
+    "conflitos_pressoes": {
+      "situacao_fundiaria": {
+        "descricao": "Principal município do Território Quilombola Kalunga, que enfrenta conflitos por regularização fundiária incompleta, com apenas uma fração do território titulada.",
+        "fonte_nome": "Mapa de Conflitos - Fiocruz",
+        "fonte_url": "https://mapadeconflitos.ensp.fiocruz.br/conflito/go-comunidade-kalunga-quilombolas-ainda-em-busca-da-titulacao-plena-e-da-reconquista-de-suas-terras/"
+      },
+      "desmatamento": {
+        "descricao": "Focos de desmatamento ilegal para abertura de pastagens e atividades de mineração sem licença, com operações de fiscalização recorrentes.",
+        "fonte_nome": "Governo de Goiás / SEMAD",
+        "fonte_url": "https://goias.gov.br/megaoperacao-flagra-desmatamento-e-mineracao-ilegais-em-cavalcante/"
+      },
+      "mineracao": {
+        "descricao": "Existem múltiplos processos minerários registrados na ANM que incidem sobre o território, representando uma ameaça à conservação e aos modos de vida tradicionais.",
+        "fonte_nome": "Jornal Hora Extra / SEMAD",
+        "fonte_url": "https://www.jornalhoraextra.com.br/meio-ambiente/em-cavalcante-governo-de-goias-fecha-mineracao-sem-licenciamento-e-apreende-maquinario"
+      }
+    }
+  }

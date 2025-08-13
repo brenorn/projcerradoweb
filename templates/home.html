@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Projeto Cerrado{% endblock %}
+{% block content %}
+    <!-- Seção Hero -->
+    <section id="home" class="hero-bg text-white min-h-[80vh] flex items-center">
+        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <h2 class="text-3xl font-bold font-display text-white mb-2">Projeto Cerrado</h2>
+            <h1 class="text-4xl md:text-5xl font-extrabold font-display tracking-tight leading-tight mb-4">
+                PROGRAMA DE EDUCAÇÃO AMBIENTAL E FORMAÇÃO PROFISSIONAL VOLTADO PARA O DESENVOLVIMENTO SUSTENTÁVEL NO BIOMA DO CERRADO
+            </h1>
+            <p class="text-xl md:text-2xl font-light text-cerrado-amarelo-ipe max-w-3xl mx-auto">
+                A conexão do saber para o desenvolvimento sustentável do coração do Brasil.
+            </p>
+        </div>
+    </section>
+
+    <!-- Seção Quem Somos -->
+    <section id="quem-somos" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-6">Quem Somos</h2>
+                <p class="text-xl leading-relaxed">
+                    Somos uma rede de colaboração dedicada a fortalecer o Cerrado, guiada por uma missão clara, uma visão de futuro e valores sólidos.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-12 text-center">
+                <div>
+                    <div class="text-cerrado-amarelo-ipe mb-4"><i class="fas fa-bullseye fa-3x"></i></div>
+                    <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Missão</h3>
+                    <p class="text-lg leading-relaxed">
+                        Promover a integração de saberes e práticas para a conservação e o desenvolvimento sustentável do Cerrado, por meio da geração, sistematização e disseminação de conhecimento e tecnologias.
+                    </p>
+                </div>
+                <div>
+                    <div class="text-cerrado-amarelo-ipe mb-4"><i class="fas fa-eye fa-3x"></i></div>
+                    <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Visão</h3>
+                    <p class="text-lg leading-relaxed">
+                        Ser referência na conexão de atores e na promoção de soluções inovadoras para os desafios socioambientais do Cerrado, contribuindo para a sua valorização e resiliência.
+                    </p>
+                </div>
+                <div>
+                    <div class="text-cerrado-amarelo-ipe mb-4"><i class="fas fa-gem fa-3x"></i></div>
+                    <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Valores</h3>
+                    <ul class="text-lg leading-relaxed space-y-2">
+                        <li><i class="fas fa-leaf text-cerrado-verde-profundo mr-2"></i>Sustentabilidade</li>
+                        <li><i class="fas fa-lightbulb text-cerrado-amarelo-ipe mr-2"></i>Inovação</li>
+                        <li><i class="fas fa-users text-cerrado-azul-ceu-agua mr-2"></i>Colaboração</li>
+                        <li><i class="fas fa-handshake text-cerrado-ocre-terra mr-2"></i>Transparência</li>
+                        <li><i class="fas fa-heart text-red-500 mr-2"></i>Respeito</li>
+                        <li><i class="fas fa-star text-yellow-500 mr-2"></i>Excelência</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Geoportal -->
+    <section id="geoportal-home" class="py-20 bg-cinza-claro">
+        <div class="container mx-auto px-6">
+            <div class="md:flex items-center justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0 md:pr-12">
+                    <h2 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-6">Geoportal Interativo</h2>
+                    <p class="text-lg leading-relaxed mb-6">
+                        Explore dados geoespaciais, mapas temáticos e análises sobre o Cerrado em nossa plataforma. Uma ferramenta poderosa para pesquisa, planejamento e tomada de decisão, que traduz dados complexos em informações visuais e acessíveis.
+                    </p>
+                    <a href="{{ url_for('geoportal') }}" class="inline-block bg-cerrado-azul-ceu-agua text-white px-8 py-3 rounded-full font-bold text-lg hover:bg-cerrado-verde-profundo transition-transform transform hover:scale-105">Acessar o Geoportal</a>
+                </div>
+                <div class="mt-10 md:mt-0">
+                    <img src="https://images.unsplash.com/photo-1504333638930-c8787321e06e?q=80&w=2070&auto=format&fit=crop" alt="Mapa interativo do Cerrado" class="rounded-lg shadow-2xl w-full h-auto object-cover">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Trilhas de Formação -->
+    <section id="formacao" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-6">Trilhas de Formação</h2>
+                <p class="text-xl leading-relaxed">
+                    Capacite-se com nossos cursos e materiais educativos, desenvolvidos por especialistas para fortalecer a gestão e o desenvolvimento sustentável no Cerrado.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <a href="{{ url_for('gestao_publica') }}" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                    <div class="p-8 flex-grow">
+                        <div class="text-cerrado-azul-ceu-agua mb-4"><i class="fas fa-landmark fa-3x"></i></div>
+                        <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Gestão Pública Brasileira</h3>
+                        <p class="text-lg leading-relaxed">
+                            Desenvolva competências para a administração pública moderna, com foco em eficiência, transparência e inovação no contexto do Cerrado.
+                        </p>
+                    </div>
+                </a>
+                <a href="{{ url_for('desenvolvimento_sustentavel') }}" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                    <div class="p-8 flex-grow">
+                        <div class="text-cerrado-azul-ceu-agua mb-4"><i class="fas fa-globe fa-3x"></i></div>
+                        <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Desenvolvimento Sustentável</h3>
+                        <p class="text-lg leading-relaxed">
+                            Aprenda a integrar a sustentabilidade em projetos e políticas públicas, considerando os aspectos ambientais, sociais e econômicos.
+                        </p>
+                    </div>
+                </a>
+                <a href="{{ url_for('analise_dados') }}" class="bg-white rounded-lg shadow-lg overflow-hidden transform hover:-translate-y-2 transition-transform duration-300 flex flex-col">
+                    <div class="p-8 flex-grow">
+                        <div class="text-cerrado-azul-ceu-agua mb-4"><i class="fas fa-chart-line fa-3x"></i></div>
+                        <h3 class="text-2xl font-bold font-display text-cerrado-verde-profundo mb-3">Análise de Dados para a Tomada de Decisão</h3>
+                        <p class="text-lg leading-relaxed">
+                            Desenvolva habilidades em análise de dados para apoiar a tomada de decisão em contextos de desenvolvimento sustentável.
+                        </p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção Contato -->
+    <section id="contato" class="py-20 bg-cerrado-verde-profundo text-white">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold font-display mb-6">Entre em Contato</h2>
+            <p class="text-xl max-w-2xl mx-auto mb-8">Tem alguma dúvida, sugestão ou quer colaborar? Fale conosco!</p>
+            <a href="mailto:projetocerradoft@gmail.com" class="bg-cerrado-amarelo-ipe text-cerrado-verde-profundo px-8 py-4 rounded-full font-bold text-lg hover:bg-white transition-transform transform hover:scale-105">ENVIAR E-MAIL</a>
+        </div>
+    </section>
+{% endblock %}

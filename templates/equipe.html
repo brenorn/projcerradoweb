@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Equipe - Projeto Cerrado{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <h1 class="section-title mb-8">Equipe</h1>
+
+    <!-- Professores -->
+    <section class="container mx-auto px-6 py-10">
+    <h1 class="text-3xl font-display font-extrabold text-cerrado-verde-profundo mb-6">Nossa Equipe</h1>
+    {% if professores and professores|length > 0 %}
+      <h2 class="text-2xl font-bold mb-4">Professores</h2>
+      <div class="space-y-3" id="lista-professores">
+          {% for prof in professores %}
+            <article class="border rounded-lg overflow-hidden">
+              <button class="w-full text-left px-4 py-3 font-semibold flex items-center justify-between hover:bg-cinza-claro focus:outline-none">
+                <span class="flex items-center gap-3">
+                  <img src="{{ prof.foto if prof.foto else '/static/imagens/professores/avatar-default.svg' }}" alt="Foto de {{ prof.nome }}" class="w-8 h-8 rounded-full object-cover">
+                  <span class="text-cerrado-verde-profundo">{{ prof.nome }}</span>
+                </span>
+                <svg class="w-5 h-5 text-cerrado-verde-profundo transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="px-4 overflow-hidden transition-all duration-300 max-h-0">
+                {% if prof.bio %}
+                  <p class="text-gray-700 py-2">{{ prof.bio }}</p>
+                {% endif %}
+                {% if prof.areas %}
+                  <div class="flex flex-wrap gap-2 pb-2 mb-2">
+                    {% for a in prof.areas %}
+                      <span class="badge" data-area="{{ a }}">{{ a }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+                {% if prof.lattes %}
+                  <p class="mt-6 pb-4" style="clear: both;"><a class="btn-outline inline-block" style="position: static; display: inline-block;" href="{{ prof.lattes }}" target="_blank" rel="noopener">Currículo Lattes</a></p>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-gray-600">Nenhum professor cadastrado ainda.</p>
+    {% endif %}
+
+    {% if gestao and gestao|length > 0 %}
+      <div class="mt-10">
+        <h2 class="text-2xl font-bold mb-4">Equipe de Gestão</h2>
+        <div class="space-y-3" id="lista-gestao">
+          {% for m in gestao %}
+            <article class="border rounded-lg overflow-hidden">
+              <button class="w-full text-left px-4 py-3 font-semibold flex items-center justify-between hover:bg-cinza-claro focus:outline-none">
+                <span class="flex items-center gap-3">
+                  <img src="{{ m.foto if m.foto else '/static/imagens/professores/avatar-default.svg' }}" alt="Foto de {{ m.nome }}" class="w-8 h-8 rounded-full object-cover">
+                  <span>
+                    <span class="text-cerrado-verde-profundo">{{ m.nome }}</span>
+                    {% if m.papel %}
+                      <span class="ml-2 text-xs px-2 py-0.5 rounded-full bg-cinza-claro text-institucional-cinza align-middle">{{ m.papel }}</span>
+                    {% endif %}
+                  </span>
+                </span>
+                <svg class="w-5 h-5 text-cerrado-verde-profundo transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+              <div class="px-4 overflow-hidden transition-all duration-300 max-h-0">
+                {% if m.bio %}
+                  <p class="text-gray-700 py-2">{{ m.bio }}</p>
+                {% endif %}
+                {% if m.lattes %}
+                  <p class="mt-6 pb-4" style="clear: both;"><a class="btn-outline inline-block" style="position: static; display: inline-block;" href="{{ m.lattes }}" target="_blank" rel="noopener">Currículo Lattes</a></p>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Inicializa acordeão para listas com o mesmo padrão de markup
+  function initAccordion(listId) {
+    const list = document.getElementById(listId);
+    if (!list) return;
+    list.querySelectorAll('article').forEach((card) => {
+      const btn = card.querySelector('button');
+      const panel = card.querySelector('div');
+      const icon = card.querySelector('svg');
+      const recalc = () => {
+        if (panel.style.maxHeight && panel.style.maxHeight !== '0px') {
+          panel.style.maxHeight = 'auto';
+          const h = panel.scrollHeight;
+          panel.style.maxHeight = h + 'px';
+        }
+      };
+
+      // Recalcular quando imagens carregarem
+      panel.querySelectorAll('img').forEach(img => {
+        if (!img.complete) {
+          img.addEventListener('load', recalc, { once: true });
+        }
+      });
+
+      btn.addEventListener('click', () => {
+        const isOpen = panel.style.maxHeight && panel.style.maxHeight !== '0px';
+        if (isOpen) {
+          panel.style.maxHeight = '0px';
+          icon.style.transform = 'rotate(0deg)';
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          // fecha outros itens desta lista
+          list.querySelectorAll('article div').forEach(p => p.style.maxHeight = '0px');
+          list.querySelectorAll('article svg').forEach(i => i.style.transform = 'rotate(0deg)');
+          panel.style.maxHeight = panel.scrollHeight + 'px';
+          icon.style.transform = 'rotate(180deg)';
+          btn.setAttribute('aria-expanded', 'true');
+          // nova medição após pintura e possíveis fontes/imagens
+          setTimeout(recalc, 60);
+        }
+      });
+    });
+
+    // Recalcular painéis abertos ao redimensionar a janela
+    window.addEventListener('resize', () => {
+      list.querySelectorAll('article div').forEach(panel => {
+        if (panel.style.maxHeight && panel.style.maxHeight !== '0px') {
+          panel.style.maxHeight = 'auto';
+          const h = panel.scrollHeight;
+          panel.style.maxHeight = h + 'px';
+        }
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    initAccordion('lista-professores');
+    initAccordion('lista-gestao');
+
+    // Coloração de badges por área (inline styles, independente do Tailwind)
+    const areaColors = {
+      'Recursos Hídricos': { bg: '#E0F2FE', fg: '#075985' },
+      'Limnologia': { bg: '#E0F2FE', fg: '#075985' },
+      'Modelagem Hidrológica': { bg: '#DBEAFE', fg: '#1E3A8A' },
+      'Gestão Ambiental': { bg: '#ECFCCB', fg: '#365314' },
+      'Políticas Públicas': { bg: '#FEF9C3', fg: '#854D0E' },
+      'Geoprocessamento': { bg: '#EDE9FE', fg: '#5B21B6' },
+      'Sensoriamento Remoto': { bg: '#EDE9FE', fg: '#5B21B6' },
+      'Mudanças Climáticas': { bg: '#FFE4E6', fg: '#9F1239' },
+      'Uso e Cobertura da Terra': { bg: '#FFF7ED', fg: '#9A3412' },
+      'Análises Ambientais': { bg: '#F1F5F9', fg: '#0F172A' },
+      'Silvicultura': { bg: '#DCFCE7', fg: '#166534' },
+      'Recuperação de Áreas Degradadas': { bg: '#DCFCE7', fg: '#166534' },
+      'Biodiversidade': { bg: '#F0FDF4', fg: '#14532D' },
+      'Perícia Ambiental': { bg: '#F5F5F4', fg: '#1C1917' },
+      'Administração Florestal': { bg: '#FAE8FF', fg: '#6B21A8' },
+      'Política Florestal': { bg: '#FAE8FF', fg: '#6B21A8' },
+      'Saneamento': { bg: '#E0F2FE', fg: '#075985' },
+      'Tratamento de Efluentes': { bg: '#E0F2FE', fg: '#075985' },
+      'Bioprocessos': { bg: '#E0E7FF', fg: '#3730A3' },
+      'Remoção de Nutrientes': { bg: '#E0E7FF', fg: '#3730A3' },
+      'Microplásticos': { bg: '#FFE4E6', fg: '#9F1239' },
+      'Resíduos Sólidos': { bg: '#FFF7ED', fg: '#9A3412' },
+      'Segurança do Trabalho': { bg: '#FEF3C7', fg: '#92400E' },
+      'Materiais de Construção': { bg: '#F5F5F4', fg: '#1C1917' },
+      'Estruturas': { bg: '#E5E7EB', fg: '#111827' },
+      'Construção Civil': { bg: '#E5E7EB', fg: '#111827' }
+    };
+
+    document.querySelectorAll('.badge[data-area]').forEach(el => {
+      const key = el.getAttribute('data-area');
+      const c = areaColors[key];
+      if (c) {
+        el.style.backgroundColor = c.bg;
+        el.style.color = c.fg;
+        el.style.borderColor = c.fg + '33';
+      }
+    });
+  });
+</script>
+{% endblock %}

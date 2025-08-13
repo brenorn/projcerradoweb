@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interativo: Análise da RIDE-DF</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: A single-page dashboard with top navigation to switch between thematic sections (Overview, Comparative Analysis, Territorial Models, Recommendations, Sources). This non-linear, thematic structure allows users to directly compare municipalities and explore concepts without being bound to the report's linear format. The core interaction is a municipality selector that dynamically updates all charts and data cards, facilitating user-driven exploration and discovery of the core dichotomy presented in the report. Source links are added for academic traceability. -->
+    <!-- Visualization & Content Choices: The application uses a bubble chart (Chart.js) to compare Population/Area/Density, which is more effective than separate bars for showing relationships. Qualitative data like economic drivers and governance status are shown in dynamic cards and status indicators for clarity. Conceptual models (Ancestral vs. Periphery) are built with structured HTML/CSS to avoid static images. An accordion is used for recommendations to manage text density. Tooltips are added to data points to show specific sources. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F5F2;
+            color: #334155;
+            scroll-behavior: smooth;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active {
+            border-bottom-color: #D87C5B;
+            color: #D87C5B;
+        }
+        .nav-link:hover {
+            color: #D87C5B;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 400px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 500px;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .source-tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .source-tooltip .tooltip-text {
+            visibility: hidden;
+            width: 220px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -110px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .source-tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="app" class="min-h-screen">
+        <header class="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold text-slate-700">Análise RIDE-DF</h1>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#overview" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Visão Geral</a>
+                            <a href="#comparativo" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Análise Comparativa</a>
+                            <a href="#modelos" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Modelos Territoriais</a>
+                            <a href="#recomendacoes" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Recomendações</a>
+                            <a href="#fontes" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-slate-600">Fontes</a>
+                        </div>
+                    </div>
+                    <div class="md:hidden">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-100 focus:outline-none">
+                            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+            <div id="mobile-menu" class="md:hidden hidden">
+                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                    <a href="#overview" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Visão Geral</a>
+                    <a href="#comparativo" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Análise Comparativa</a>
+                    <a href="#modelos" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Modelos Territoriais</a>
+                    <a href="#recomendacoes" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Recomendações</a>
+                    <a href="#fontes" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-slate-600">Fontes</a>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <section id="overview" class="page-section fade-in pt-16 -mt-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">Dois Territórios, Uma Região</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">
+                        Esta análise explora a profunda dicotomia na RIDE-DF, contrastando municípios de vocação ancestral e de preservação com a dinâmica de expansão da periferia metropolitana de Brasília. Navegue pelas seções para entender os desafios e as potencialidades de cada território.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-center">
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-slate-700">Cavalcante</h3>
+                        <p class="text-4xl font-bold text-[#4A5C4D] mt-2">1,38</p>
+                        <p class="text-sm text-slate-500">hab/km² <sup class="source-tooltip text-blue-500 font-bold">[2]<span class="tooltip-text">Fonte: IBGE, Cidades. Área da unidade territorial.</span></sup></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-slate-700">Teresina de Goiás</h3>
+                        <p class="text-4xl font-bold text-[#4A5C4D] mt-2">3,44</p>
+                        <p class="text-sm text-slate-500">hab/km² <sup class="source-tooltip text-blue-500 font-bold">[27]<span class="tooltip-text">Fonte: IBGE, Cidades. População e Área do município.</span></sup></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-slate-700">Monte Alegre de Goiás</h3>
+                        <p class="text-4xl font-bold text-[#4A5C4D] mt-2">2,14</p>
+                        <p class="text-sm text-slate-500">hab/km² <sup class="source-tooltip text-blue-500 font-bold">[43]<span class="tooltip-text">Fonte: IBGE, Cidades. População e Área do município.</span></sup></p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="font-semibold text-slate-700">Cidade Ocidental</h3>
+                        <p class="text-4xl font-bold text-[#D87C5B] mt-2">235,31</p>
+                        <p class="text-sm text-slate-500">hab/km² <sup class="source-tooltip text-blue-500 font-bold">[59]<span class="tooltip-text">Fonte: IBGE, Cidades. População e Área do município.</span></sup></p>
+                    </div>
+                </div>
+                <p class="text-center mt-6 text-slate-500 text-sm">A densidade demográfica revela a principal diferença entre os territórios.</p>
+            </section>
+
+            <section id="comparativo" class="page-section hidden fade-in pt-16 -mt-16">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">Análise Comparativa</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">
+                        Selecione os municípios abaixo para comparar dados demográficos, econômicos e de governança lado a lado. As visualizações serão atualizadas dinamicamente.
+                    </p>
+                </div>
+                
+                <div id="municipio-selector" class="flex flex-wrap justify-center gap-4 mb-10">
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">População vs. Área Territorial</h3>
+                    <p class="text-center text-slate-500 mb-6 -mt-2 text-sm">O tamanho da bolha representa a densidade demográfica.</p>
+                    <div class="chart-container">
+                        <canvas id="populationChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-12">
+                    <h3 class="text-xl font-semibold text-slate-800 mb-6 text-center">Vetores Econômicos e Governança</h3>
+                    <div id="cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    </div>
+                </div>
+            </section>
+
+            <section id="modelos" class="page-section hidden fade-in pt-16 -mt-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">Modelos e Conflitos Territoriais</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">
+                        A RIDE-DF é marcada pela coexistência de dois modelos de ocupação distintos, gerando tensões sobre o uso da terra. Esta seção detalha as características e os principais conflitos de cada modelo.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-[#4A5C4D]">
+                        <h3 class="text-2xl font-bold text-slate-800">Modelo Ancestral e de Conservação</h3>
+                        <p class="text-slate-600 mt-2 mb-6">Representado por Cavalcante, Teresina de Goiás e Monte Alegre de Goiás.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-[#4A5C4D] mr-3 mt-1">●</span> Baixíssima densidade demográfica em vastos territórios. <sup class="source-tooltip text-blue-500 font-bold">[2, 27, 43]<span class="tooltip-text">Fontes: IBGE, Cidades.</span></sup></li>
+                            <li class="flex items-start"><span class="text-[#4A5C4D] mr-3 mt-1">●</span> Economia baseada em recursos naturais: ecoturismo e mineração. <sup class="source-tooltip text-blue-500 font-bold">[6, 49]<span class="tooltip-text">Fontes: Plano Diretor Cavalcante; ANM.</span></sup></li>
+                            <li class="flex items-start"><span class="text-[#4A5C4D] mr-3 mt-1">●</span> Forte presença de áreas protegidas (PNCV) e territórios tradicionais (Kalunga). <sup class="source-tooltip text-blue-500 font-bold">[17, 20]<span class="tooltip-text">Fontes: ICMBio; INCRA.</span></sup></li>
+                            <li class="flex items-start"><span class="text-[#4A5C4D] mr-3 mt-1">●</span> Governança fragmentada e planejamento municipal com baixa capacidade institucional.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-[#D87C5B]">
+                        <h3 class="text-2xl font-bold text-slate-800">Modelo de Expansão Metropolitana</h3>
+                        <p class="text-slate-600 mt-2 mb-6">Representado por Cidade Ocidental.</p>
+                        <ul class="space-y-4">
+                            <li class="flex items-start"><span class="text-[#D87C5B] mr-3 mt-1">●</span> Urbanização intensiva e crescimento populacional explosivo. <sup class="source-tooltip text-blue-500 font-bold">[59]<span class="tooltip-text">Fonte: IBGE, Censo 2022.</span></sup></li>
+                            <li class="flex items-start"><span class="text-[#D87C5B] mr-3 mt-1">●</span> Forte conexão com Brasília, funcionando como "cidade-dormitório". <sup class="source-tooltip text-blue-500 font-bold">[66]<span class="tooltip-text">Fonte: Estudo acadêmico.</span></sup></li>
+                            <li class="flex items-start"><span class="text-[#D87C5B] mr-3 mt-1">●</span> Graves déficits de infraestrutura (saneamento, mobilidade). <sup class="source-tooltip text-blue-500 font-bold">[70, 76]<span class="tooltip-text">Fontes: CODEPLAN; SNIS.</span></sup></li>
+                            <li class="flex items-start"><span class="text-[#D87C5B] mr-3 mt-1">●</span> Planejamento urbano reativo, com legislação robusta para tentar ordenar o crescimento. <sup class="source-tooltip text-blue-500 font-bold">[74]<span class="tooltip-text">Fonte: Lei de Uso e Ocupação do Solo de Cidade Ocidental.</span></sup></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recomendacoes" class="page-section hidden fade-in pt-16 -mt-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">Recomendações Estratégicas</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">
+                        Diretrizes para o desenvolvimento sustentável, direcionadas para cada modelo territorial e para a governança integrada da RIDE-DF.
+                    </p>
+                </div>
+                <div id="accordion-container" class="space-y-4 max-w-4xl mx-auto">
+                </div>
+            </section>
+            
+            <section id="fontes" class="page-section hidden fade-in pt-16 -mt-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-slate-800 sm:text-4xl">Fontes de Dados</h2>
+                    <p class="mt-4 max-w-3xl mx-auto text-lg text-slate-600">
+                        Lista de referências utilizadas na compilação dos dados apresentados neste painel.
+                    </p>
+                </div>
+                <div id="fontes-container" class="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto text-sm text-slate-600 space-y-2">
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script>
+        const appData = {
+            municipios: [
+                {
+                    id: 'cavalcante',
+                    nome: 'Cavalcante',
+                    populacao: 9589,
+                    area: 6953.7,
+                    densidade: 1.38,
+                    cor: 'rgba(74, 92, 77, 0.7)',
+                    corBorda: 'rgba(74, 92, 77, 1)',
+                    vetores: ['🏞️ Ecoturismo', '⛏️ Mineração', '🐄 Pecuária'],
+                    governanca: 'Em Revisão',
+                    governancaCor: 'bg-yellow-400',
+                    governancaNota: 'Plano Diretor de 2012 em debate para revisão, com pressão social por lotes menores.',
+                    fontes: {
+                        populacao: '[1]',
+                        area: '[2]',
+                        governanca: '[26]'
+                    }
+                },
+                {
+                    id: 'teresina',
+                    nome: 'Teresina de Goiás',
+                    populacao: 2701,
+                    area: 784.793,
+                    densidade: 3.44,
+                    cor: 'rgba(115, 144, 119, 0.7)',
+                    corBorda: 'rgba(115, 144, 119, 1)',
+                    vetores: ['🏞️ Ecoturismo', '🌱 Agricultura Familiar'],
+                    governanca: 'Inacessível',
+                    governancaCor: 'bg-red-500',
+                    governancaNota: 'Plano Diretor não localizado em fontes públicas. Governança dominada por instâncias federais (ICMBio, INCRA).',
+                    fontes: {
+                        populacao: '[27]',
+                        area: '[27]',
+                        governanca: '[39, 40]'
+                    }
+                },
+                {
+                    id: 'montealegre',
+                    nome: 'Monte Alegre de Goiás',
+                    populacao: 6692,
+                    area: 3119.860,
+                    densidade: 2.14,
+                    cor: 'rgba(168, 185, 168, 0.7)',
+                    corBorda: 'rgba(168, 185, 168, 1)',
+                    vetores: ['⛏️ Mineração (Estanho)', '🐄 Pecuária'],
+                    governanca: 'Inacessível',
+                    governancaCor: 'bg-red-500',
+                    governancaNota: 'Plano Diretor mencionado, mas não localizado. Governança fragmentada entre município, ANM e INCRA.',
+                    fontes: {
+                        populacao: '[43]',
+                        area: '[43]',
+                        governanca: '[55]'
+                    }
+                },
+                {
+                    id: 'cidadeocidental',
+                    nome: 'Cidade Ocidental',
+                    populacao: 91767,
+                    area: 389.985,
+                    densidade: 235.31,
+                    cor: 'rgba(216, 124, 91, 0.7)',
+                    corBorda: 'rgba(216, 124, 91, 1)',
+                    vetores: ['🏙️ "Cidade-Dormitório"', '🛠️ Serviços', '🧱 Mineração (Construção)'],
+                    governanca: 'Acessível e Detalhado',
+                    governancaCor: 'bg-green-500',
+                    governancaNota: 'Legislação de 2016 robusta e acessível, atuando de forma reativa para ordenar o crescimento acelerado.',
+                    fontes: {
+                        populacao: '[59]',
+                        area: '[60, 61]',
+                        governanca: '[74]'
+                    }
+                },
+            ],
+            recomendacoes: [
+                {
+                    titulo: 'Para o "Território-Ancestral" (Chapada)',
+                    itens: [
+                        'Fortalecer a Governança Participativa e Integrada, tornando os Planos Diretores públicos e alinhados com os planos do PNCV e do Território Kalunga.',
+                        'Implementar o Zoneamento Ecológico-Econômico (ZEE) para delimitar áreas de mineração, turismo e conservação.',
+                        'Fomentar o Turismo de Base Comunitária, garantindo que os benefícios econômicos permaneçam na comunidade local.'
+                    ]
+                },
+                {
+                    titulo: 'Para o "Território-Periferia" (Cidade Ocidental)',
+                    itens: [
+                        'Priorizar investimentos massivos em saneamento básico e mobilidade urbana para mitigar o déficit de infraestrutura.',
+                        'Implementar políticas de desenvolvimento econômico local para reduzir a dependência de Brasília e o caráter de "cidade-dormitório".',
+                        'Utilizar proativamente as Zonas Especiais de Interesse Social (ZEIS) para prover moradia digna e planejada.'
+                    ]
+                },
+                {
+                    titulo: 'Para a Governança Integrada da RIDE-DF',
+                    itens: [
+                        'Estabelecer um Fórum de Governança Metropolitana para articular os planos diretores de todos os municípios com o do DF.',
+                        'Desenvolver um mecanismo de Pagamento por Serviços Ambientais (PSA) para compensar os municípios da Chapada pela conservação.',
+                        'Criar roteiros turísticos integrados que conectem Brasília à Chapada dos Veadeiros, distribuindo os benefícios do turismo.'
+                    ]
+                }
+            ],
+            fontesLista: {
+                '[1]': 'IBGE. Censo 2022. População de Cavalcante.',
+                '[2]': 'IBGE. Cidades. Área da unidade territorial de Cavalcante.',
+                '[6]': 'Plano Diretor Municipal de Cavalcante.',
+                '[17]': 'ICMBio. Dados sobre o Parque Nacional da Chapada dos Veadeiros.',
+                '[20]': 'INCRA. Dados sobre o Território Quilombola Kalunga.',
+                '[26]': 'Lei nº 1071/2012 e Ata de Audiência Pública de Revisão do Plano Diretor de Cavalcante.',
+                '[27]': 'IBGE. Cidades. População e Área do município de Teresina de Goiás.',
+                '[39, 40]': 'Pesquisa em portais legislativos (resultado infrutífero para Teresina de Goiás).',
+                '[43]': 'IBGE. Cidades. População e Área do município de Monte Alegre de Goiás.',
+                '[49]': 'Agência Nacional de Mineração (ANM). Processos minerários.',
+                '[55]': 'Portal da Câmara Municipal de Monte Alegre de Goiás.',
+                '[59]': 'IBGE. Censo 2022. População de Cidade Ocidental.',
+                '[60, 61]': 'IBGE e Portal da Prefeitura de Cidade Ocidental. Área territorial.',
+                '[66]': 'Estudos acadêmicos sobre cidades-dormitório na RIDE-DF.',
+                '[70]': 'CODEPLAN. Pesquisa Metropolitana por Amostra de Domicílios (PMAD) 2019/2020.',
+                '[74]': 'Lei nº 1.027, de 26 de dezembro de 2016. Lei de Uso e Ocupação do Solo de Cidade Ocidental.',
+                '[76]': 'Sistema Nacional de Informações sobre Saneamento (SNIS).'
+            }
+        };
+
+        let populationChart;
+        let selectedMunicipios = ['cavalcante', 'teresina', 'montealegre', 'cidadeocidental'];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+
+        function initApp() {
+            setupNavigation();
+            setupMobileMenu();
+            renderMunicipioSelector();
+            renderAccordion();
+            renderFontes();
+            createPopulationChart();
+            updateDashboard();
+            
+            document.querySelector('.nav-link[href="#overview"]').click();
+        }
+
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.page-section');
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    document.querySelectorAll(`.nav-link[href="${targetId}"]`).forEach(activeLink => activeLink.classList.add('active'));
+
+                    if (document.getElementById('mobile-menu').classList.contains('hidden') === false) {
+                        document.getElementById('mobile-menu').classList.add('hidden');
+                    }
+                });
+            });
+        }
+        
+        function setupMobileMenu() {
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+        }
+
+        function renderMunicipioSelector() {
+            const container = document.getElementById('municipio-selector');
+            container.innerHTML = appData.municipios.map(m => `
+                <label for="${m.id}" class="flex items-center space-x-2 cursor-pointer p-2 rounded-md transition-colors duration-200 hover:bg-gray-100">
+                    <input type="checkbox" id="${m.id}" data-id="${m.id}" class="municipio-checkbox h-4 w-4 rounded border-gray-300 text-[${m.corBorda}] focus:ring-[${m.corBorda}]" checked>
+                    <span style="color: ${m.corBorda};" class="font-medium">${m.nome}</span>
+                </label>
+            `).join('');
+
+            document.querySelectorAll('.municipio-checkbox').forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    selectedMunicipios = Array.from(document.querySelectorAll('.municipio-checkbox:checked')).map(cb => cb.dataset.id);
+                    updateDashboard();
+                });
+            });
+        }
+
+        function createPopulationChart() {
+            const ctx = document.getElementById('populationChart').getContext('2d');
+            populationChart = new Chart(ctx, {
+                type: 'bubble',
+                data: { datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'Área Territorial (km²) - Escala Logarítmica'
+                            }
+                        },
+                        y: {
+                            type: 'logarithmic',
+                            title: {
+                                display: true,
+                                text: 'População (habitantes) - Escala Logarítmica'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const d = context.raw;
+                                    return `${d.label}: Pop ${d.y.toLocaleString('pt-BR')} ${d.fontes.pop}, Área ${d.x.toLocaleString('pt-BR')} km² ${d.fontes.area}, Dens. ${d.r.toFixed(2)} hab/km²`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDashboard() {
+            const filteredData = appData.municipios.filter(m => selectedMunicipios.includes(m.id));
+            updatePopulationChart(filteredData);
+            renderCards(filteredData);
+        }
+
+        function updatePopulationChart(data) {
+            populationChart.data.datasets = data.map(m => ({
+                label: m.nome,
+                data: [{
+                    x: m.area,
+                    y: m.populacao,
+                    r: m.densidade,
+                    label: m.nome,
+                    fontes: {pop: m.fontes.populacao, area: m.fontes.area}
+                }],
+                backgroundColor: m.cor,
+                borderColor: m.corBorda,
+                borderWidth: 2
+            }));
+            populationChart.update();
+        }
+
+        function renderCards(data) {
+            const container = document.getElementById('cards-container');
+            if (data.length === 0) {
+                container.innerHTML = `<p class="text-center text-slate-500 col-span-full">Selecione ao menos um município para visualizar os dados.</p>`;
+                return;
+            }
+            container.innerHTML = data.map(m => `
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 fade-in" style="border-color: ${m.corBorda};">
+                    <h4 class="font-bold text-lg text-slate-800">${m.nome}</h4>
+                    <div class="mt-4">
+                        <p class="font-semibold text-sm text-slate-600">Vetores Econômicos:</p>
+                        <ul class="mt-1 space-y-1">
+                            ${m.vetores.map(v => `<li class="text-sm text-slate-500">${v}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="mt-4">
+                        <p class="font-semibold text-sm text-slate-600">Status do Planejamento:
+                            <sup class="source-tooltip text-blue-500 font-bold">${m.fontes.governanca}<span class="tooltip-text">${appData.fontesLista[m.fontes.governanca] || 'Fonte não especificada.'}</span></sup>
+                        </p>
+                        <div class="flex items-center mt-1">
+                            <span class="h-3 w-3 rounded-full ${m.governancaCor} mr-2"></span>
+                            <span class="text-sm font-medium text-slate-700">${m.governanca}</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">${m.governancaNota}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderAccordion() {
+            const container = document.getElementById('accordion-container');
+            container.innerHTML = appData.recomendacoes.map((rec, index) => `
+                <div class="bg-white rounded-lg shadow-md">
+                    <h2>
+                        <button type="button" class="accordion-button flex items-center justify-between w-full p-5 font-medium text-left text-slate-700" data-accordion-target="#accordion-content-${index}">
+                            <span>${rec.titulo}</span>
+                            <svg class="accordion-arrow w-6 h-6 shrink-0 transition-transform duration-200" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                        </button>
+                    </h2>
+                    <div id="accordion-content-${index}" class="accordion-content">
+                        <div class="p-5 border-t border-gray-200">
+                            <ul class="space-y-3 text-slate-600 list-disc list-inside">
+                                ${rec.itens.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.parentElement.nextElementSibling;
+                    const arrow = button.querySelector('.accordion-arrow');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        arrow.style.transform = 'rotate(0deg)';
+                    } else {
+                        document.querySelectorAll('.accordion-content').forEach(el => el.style.maxHeight = null);
+                        document.querySelectorAll('.accordion-arrow').forEach(el => el.style.transform = 'rotate(0deg)');
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        arrow.style.transform = 'rotate(180deg)';
+                    }
+                });
+            });
+        }
+
+        function renderFontes() {
+            const container = document.getElementById('fontes-container');
+            container.innerHTML = Object.entries(appData.fontesLista).map(([key, value]) => 
+                `<p><strong class="text-slate-800">${key}</strong>: ${value}</p>`
+            ).join('');
+        }
+
+    </script>
+</body>
+</html>

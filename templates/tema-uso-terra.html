@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Tema: Uso e Ocupação da Terra - Projeto Cerrado{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <nav class="breadcrumb mb-3" aria-label="breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a> / <a href="{{ url_for('temas') }}">Temas</a> / <span>Uso e Ocupação da Terra</span>
+    </nav>
+    <h1 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-2 section-title">Uso e Ocupação da Terra</h1>
+    <p class="mb-6">Classes de uso (MapBiomas) e mudanças (placeholder).</p>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="card">
+        <h3 class="font-semibold mb-2">Indicadores</h3>
+        <ul class="list-disc list-inside text-sm">
+          <li>Área por classe (ha)</li>
+          <li>Mudanças por período</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 class="font-semibold mb-2">Mapa Temático</h3>
+        <p>Embed do mapa filtrado por tema (placeholder).</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

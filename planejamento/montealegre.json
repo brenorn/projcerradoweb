@@ -1,0 +1,102 @@
+{
+    "identificacao": {
+      "nome_municipio": "Monte Alegre de Goiás",
+      "uf": "GO",
+      "codigo_ibge": "5213509",
+      "fonte_info_administrativa": {
+        "nome": "IBGE Cidades",
+        "url": "https://www.ibge.gov.br/cidades-e-estados/go/monte-alegre-de-goias.html"
+      }
+    },
+    "geografia_territorio": {
+      "area_territorial_km2": {
+        "valor": 3119.860,
+        "ano_referencia": 2024,
+        "fonte_nome": "IBGE",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/monte-alegre-de-goias.html"
+      },
+      "bioma": {
+        "valor": "Cerrado",
+        "ano_referencia": 2020,
+        "fonte_nome": "InfoSanBas",
+        "fonte_url": "https://infosanbas.org.br/municipio/monte-alegre-de-goias-go/"
+      }
+    },
+    "demografia": {
+      "populacao_censo_2022": {
+        "valor": 6692,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/monte-alegre-de-goias.html"
+      },
+      "populacao_censo_2010": {
+        "valor": 7730,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE - Censo 2010",
+        "fonte_url": "https://censo2010.ibge.gov.br/sinopse/index.php?dados=0&uf=52"
+      },
+      "densidade_demografica_hab_km2": {
+        "valor": 2.14,
+        "ano_referencia": 2022,
+        "fonte_nome": "IBGE - Censo 2022",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/monte-alegre-de-goias.html"
+      }
+    },
+    "socioeconomia": {
+      "idhm_2010": {
+        "valor": 0.615,
+        "ano_referencia": 2010,
+        "fonte_nome": "IBGE / PNUD",
+        "fonte_url": "https://www.ibge.gov.br/cidades-e-estados/go/monte-alegre-de-goias.html"
+      },
+      "pib_per_capita_reais": {
+        "valor": 9357.26,
+        "ano_referencia": 2015,
+        "fonte_nome": "IBGE / Brasil Central",
+        "fonte_url": "http://www.brasilcentral.go.gov.br/amc/dgmun.php?loc_cod=521350"
+      },
+      "censo_agropecuario_2017": {
+        "numero_estabelecimentos": 903,
+        "area_total_estabelecimentos_ha": 179675,
+        "pessoal_ocupado": 2259,
+        "area_lavouras_ha": 240,
+        "area_pastagens_ha": 85068,
+        "fonte_nome": "IBGE - Censo Agropecuário 2017 (Plataforma SIDRA)",
+        "fonte_url": "https://sidra.ibge.gov.br/pesquisa/censo-agropecuario-2017/resultados-definitivos"
+      }
+    },
+    "cobertura_uso_solo": {
+      "dados_gerais": {
+        "ano_referencia": 2018,
+        "fonte_nome": "Projeto SanRural/UFG (Base MapBiomas)",
+        "fonte_url": "https://sanrural.ufg.br/wp-content/uploads/2018/04/DTM-Monte_Alegre_Goias_ISBN.pdf"
+      },
+      "classes": [
+        {"classe": "Vegetação Nativa", "area_km2": 2125.84, "percentual": 68.14},
+        {"classe": "Pastagem", "area_km2": 973.69, "percentual": 31.21},
+        {"classe": "Agricultura", "area_km2": 8.42, "percentual": 0.27},
+        {"classe": "Corpos Hídricos", "area_km2": 10.92, "percentual": 0.35},
+        {"classe": "Área Urbana", "area_km2": 0.62, "percentual": 0.02}
+      ]
+    },
+    "governanca_planejamento": {
+      "plano_diretor": {
+        "existe": true,
+        "observacao": "A legislação sobre o Plano Diretor é de difícil localização, com muitas referências a municípios homônimos. O portal da Câmara Municipal menciona a existência de um 'Plano Diretor'.",
+        "fonte_nome": "Câmara Municipal de Monte Alegre de Goiás",
+        "fonte_url": "https://acessoainformacao.montealegredegoias.go.leg.br/cidadao/legislacao/leis"
+      }
+    },
+    "conflitos_pressoes": {
+      "situacao_fundiaria": {
+        "descricao": "Parte integrante do Território Quilombola Kalunga, compartilhando os mesmos desafios de regularização fundiária e pressão de interesses externos.",
+        "fonte_nome": "Mapa de Conflitos - Fiocruz",
+        "fonte_url": "https://mapadeconflitos.ensp.fiocruz.br/conflito/go-comunidade-kalunga-quilombolas-ainda-em-busca-da-titulacao-plena-e-da-reconquista-de-suas-terras/"
+      },
+      "desmatamento": {
+        "descricao": "Apresenta a maior proporção de pastagens entre os três municípios do 'Triângulo Kalunga', indicando uma fronteira de expansão da pecuária e maior pressão sobre a vegetação nativa.",
+        "fonte_nome": "Tribuna do Planalto / SEMAD",
+        "fonte_url": "https://tribunadoplanalto.com.br/desmatamento-ilegal-de-191-hectares-e-flagrado-pela-semad-em-monte-alegre/"
+      }
+    }
+  }

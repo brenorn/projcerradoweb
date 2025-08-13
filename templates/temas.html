@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Temas - Projeto Cerrado{% endblock %}
+
+{% block content %}
+<section class="py-16 bg-white">
+  <div class="container mx-auto px-6">
+    <nav class="breadcrumb mb-3" aria-label="breadcrumb">
+      <a href="{{ url_for('home') }}">Home</a> / <span>Temas</span>
+    </nav>
+    <h1 class="text-4xl font-bold font-display text-cerrado-verde-profundo mb-2 section-title">Temas</h1>
+    <p class="mb-8 text-lg">Escolha um tema para explorar indicadores, metodologia e mapas.</p>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <a href="{{ url_for('tema_saneamento') }}" class="card transition">
+        <h3 class="text-2xl font-bold">Saneamento</h3>
+        <p class="text-sm text-gray-600">Cobertura água/esgoto, ETEs...</p>
+      </a>
+      <a href="{{ url_for('tema_recursos_hidricos') }}" class="card transition">
+        <h3 class="text-2xl font-bold">Recursos Hídricos</h3>
+        <p class="text-sm text-gray-600">Corpos d'água, qualidade...</p>
+      </a>
+      <a href="{{ url_for('tema_uso_terra') }}" class="card transition">
+        <h3 class="text-2xl font-bold">Uso e Ocupação da Terra</h3>
+        <p class="text-sm text-gray-600">Classes e mudanças...</p>
+      </a>
+      <a href="{{ url_for('tema_bsa') }}" class="card transition">
+        <h3 class="text-2xl font-bold">Bens e Serviços Ambientais</h3>
+        <p class="text-sm text-gray-600">Valoração e indicadores...</p>
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
