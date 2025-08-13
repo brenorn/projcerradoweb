@@ -1,12 +1,9 @@
 import os
 import json
-from pathlib import Path
 from flask import Flask, render_template, abort, jsonify
 from urllib.request import urlopen, Request
-from urllib.error import URLError, HTTPError
 import gzip
 from io import BytesIO
-from sqlalchemy import func
 from etl_municipios import _slugify as slugify  # reuse lightweight slugify
 
 # Dados embutidos para contornar o sistema de arquivos da Vercel
