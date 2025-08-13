@@ -1,103 +1,22 @@
-from __future__ import annotations
-
-import json
-from pathlib import Path
-from typing import Optional
+# -*- coding: utf-8 -*-
+"""Função utilitária para criar 'slugs' a partir de strings."""
 
 # Try to import python-slugify; fallback to a minimal implementation
 try:
+    # A dependência 'python-slugify' deve estar no requirements.txt
     from slugify import slugify as _slugify  # type: ignore
-except Exception:  # pragma: no cover
+except ImportError:
     import re
 
     def _slugify(value: str | None) -> str:
+        """Implementação simples de slugify caso a biblioteca não esteja instalada."""
         s = (value or "").lower()
-        # remove accents and non-alphanum basic (simple fallback)
-        s = re.sub(r"[^a-z0-9\s-]", "", s, flags=re.I)
-        s = re.sub(r"\s+", "-", s).strip("-")
-        s = re.sub(r"-+", "-", s)
+        # Remove acentos e caracteres não alfa-numéricos (abordagem simples)
+        s = re.sub(r'[^a-z0-9\s-]', '', s, flags=re.I)
+        s = re.sub(r'\s+', '-', s).strip('-')
+        s = re.sub(r'-+', '-', s)
         return s
 
-from sqlalchemy.orm import Session
-
-from db import get_session
-from models import (
-    AgroCenso,
-    CoberturaUsoSoloClasse,
-    CoberturaUsoSoloResumo,
-    Demografia,
-    Fonte,
-    Geografia,
-    Governanca,
-    Municipio,
-    Socioeconomia,
-    Conflito,
-)
-
-
-def get_or_create_fonte(session: Session, nome: Optional[str], url: Optional[str]) -> Optional[int]:
-    if not nome and not url:
-        return None
-    q = session.query(Fonte)
-    if nome:
-        q = q.filter(Fonte.nome == nome)
-    if url:
-        q = q.filter(Fonte.url == url)
-    fonte = q.one_or_none()
-    if not fonte:
-        fonte = Fonte(nome=nome or "", url=url)
-        session.add(fonte)
-        session.flush()
-    return fonte.id
-
-
-def upsert_municipio(session: Session, nome: str, uf: str, codigo_ibge: str) -> Municipio:
-    m = session.query(Municipio).filter_by(codigo_ibge=codigo_ibge).one_or_none()
-    if not m:
-        m = Municipio(slug=_slugify(f"{nome}-{uf}"), nome=nome, uf=uf, codigo_ibge=codigo_ibge)
-        session.add(m)
-        session.flush()
-    return m
-
-
-def load_json_file(session: Session, path: Path) -> None:
-    data = json.loads(path.read_text(encoding="utf-8"))
-
-    ident = data.get("identificacao", {})
-    m = upsert_municipio(
-        session,
-        ident.get("nome_municipio"),
-        ident.get("uf"),
-        str(ident.get("codigo_ibge")),
-    )
-
-    # Geografia
-    geo = data.get("geografia_territorio", {})
-    if isinstance(geo, dict):
-        area = geo.get("area_territorial_km2")
-        bioma = geo.get("bioma", {}).get("valor") if isinstance(geo.get("bioma"), dict) else None
-        if isinstance(area, dict):
-            fonte_id = get_or_create_fonte(session, area.get("fonte_nome"), area.get("fonte_url"))
-            session.merge(
-                Geografia(
-                    municipio_id=m.id,
-                    ano_referencia=area.get("ano_referencia"),
-                    area_km2=area.get("valor"),
-                    bioma=bioma,
-                    fonte_id=fonte_id,
-                )
-            )
-
-    # Demografia
-    dem = data.get("demografia", {})
-    if isinstance(dem, dict):
-        densidade = dem.get("densidade_demografica_hab_km2", {})
-        densidade_valor = densidade.get("valor") if isinstance(densidade, dict) else None
-        for key in ("populacao_censo_2022", "populacao_censo_2010"):
-            d = dem.get(key)
-            if isinstance(d, dict) and d.get("ano_referencia"):
-                fonte_id = get_or_create_fonte(session, d.get("fonte_nome"), d.get("fonte_url"))
-                session.merge(
                     Demografia(
                         municipio_id=m.id,
                         ano=d.get("ano_referencia"),
