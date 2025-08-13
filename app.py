@@ -7,18 +7,10 @@ from urllib.error import URLError, HTTPError
 import gzip
 from io import BytesIO
 from sqlalchemy import func
-from db import get_session
 from etl_municipios import _slugify as slugify  # reuse lightweight slugify
-from models import (
-    Municipio,
-    Geografia,
-    Demografia,
-    Socioeconomia,
-    CoberturaUsoSoloResumo,
-    CoberturaUsoSoloClasse,
-    Governanca,
-    Conflito,
-)
+
+# Dados embutidos para contornar o sistema de arquivos da Vercel
+from dados_embutidos import DADOS_MUNICIPIOS, DADOS_PROFESSORES, DADOS_GESTAO
 
 
 app = Flask(__name__)
@@ -82,169 +74,22 @@ def sobre_legacy():
 # Hub de Municípios
 @app.route('/municipios')
 def municipios():
-    # Lista dinâmica dos municípios cadastrados
-    with get_session() as session:
-        lista = (
-            session.query(Municipio)
-            .order_by(Municipio.nome.asc())
-            .all()
-        )
-        # Fallback: se estiver vazio, lê diretamente os JSONs (sem gravar no banco)
-        if not lista:
-            try:
-                # diretório relativo ao projeto
-                json_dir = Path(__file__).resolve().parent / "planejamento"
-                if json_dir.exists():
-                    print(f"[municipios] Banco vazio; carregando JSONs somente para exibição: {json_dir}")
-                    temp = []
-                    for path in sorted(json_dir.glob('*.json')):
-                        try:
-                            data = json.loads(path.read_text(encoding='utf-8'))
-                        except Exception:
-                            continue
-                        ident = data.get('identificacao') if isinstance(data, dict) else None
-                        if not isinstance(ident, dict):
-                            continue
-                        nome = ident.get('nome_municipio')
-                        uf = ident.get('uf')
-                        codigo = str(ident.get('codigo_ibge')) if ident.get('codigo_ibge') is not None else None
-                        if not (nome and uf and codigo):
-                            continue
-                        # indicadores (opcionais)
-                        geo = data.get('geografia_territorio') if isinstance(data.get('geografia_territorio'), dict) else {}
-                        area = None
-                        bioma = None
-                        if isinstance(geo, dict):
-                            a = geo.get('area_territorial_km2')
-                            if isinstance(a, dict):
-                                area = a.get('valor')
-                            b = geo.get('bioma')
-                            if isinstance(b, dict):
-                                bioma = b.get('valor')
-
-                        dem = data.get('demografia') if isinstance(data.get('demografia'), dict) else {}
-                        pop = None
-                        if isinstance(dem, dict):
-                            c22 = dem.get('populacao_censo_2022')
-                            c10 = dem.get('populacao_censo_2010')
-                            if isinstance(c22, dict) and c22.get('valor') is not None:
-                                pop = c22.get('valor')
-                            elif isinstance(c10, dict) and c10.get('valor') is not None:
-                                pop = c10.get('valor')
-
-                        soc = data.get('socioeconomia') if isinstance(data.get('socioeconomia'), dict) else {}
-                        idhm = None
-                        pib_pc = None
-                        if isinstance(soc, dict):
-                            i = soc.get('idhm_2010')
-                            if isinstance(i, dict):
-                                idhm = i.get('valor')
-                            p = soc.get('pib_per_capita_reais')
-                            if isinstance(p, dict):
-                                pib_pc = p.get('valor')
-
-                        gov = data.get('governanca_planejamento')
-                        plano = None
-                        if isinstance(gov, dict):
-                            pd = gov.get('plano_diretor')
-                            if isinstance(pd, dict):
-                                plano = pd.get('existe')
-
-                        temp.append({
-                            'nome': nome,
-                            'uf': uf,
-                            'codigo_ibge': codigo,
-                            'slug': slugify(f"{nome}-{uf}"),
-                            'area_km2': area,
-                            'bioma': bioma,
-                            'populacao': pop,
-                            'idhm': idhm,
-                            'pib_per_capita_reais': pib_pc,
-                            'plano_diretor': plano,
-                        })
-                    # Passa a lista simples (dicts) para o template
-                    lista = temp
-            except Exception:
-                # Se falhar, segue vazio e a UI mostrará a orientação
-                pass
-    return render_template('municipios.html', municipios=lista)
+    # Usa dados embutidos para garantir funcionamento na Vercel
+    return render_template('municipios.html', municipios=DADOS_MUNICIPIOS)
 
 
 @app.route('/municipios/<slug>')
 def municipio_detalhe(slug: str):
-    """Página de detalhe do município. Busca no DB e faz fallback para JSONs.
+    """Página de detalhe do município. Busca nos dados embutidos.
     """
-    # Tenta encontrar no DB
-    with get_session() as session:
-        m = (
-            session.query(Municipio)
-            .filter(func.lower(Municipio.slug) == func.lower(slug))
-            .one_or_none()
-        )
-
-        if m:
-            ctx = {
-                'slug': m.slug,
-                'nome': m.nome,
-                'uf': m.uf,
-                'codigo_ibge': m.codigo_ibge,
-            }
-        else:
-            # Fallback: procurar JSON que gere o mesmo slug
-            ctx = None
-            try:
-                json_dir = Path(__file__).resolve().parent / "planejamento"
-                for path in json_dir.glob('*.json'):
-                    try:
-                        data = json.loads(path.read_text(encoding='utf-8'))
-                    except Exception:
-                        continue
-                    ident = data.get('identificacao') if isinstance(data, dict) else None
-                    if not isinstance(ident, dict):
-                        continue
-                    nome = ident.get('nome_municipio')
-                    uf = ident.get('uf')
-                    if not (nome and uf):
-                        continue
-                    if slugify(f"{nome}-{uf}") == slug:
-                        # indicadores básicos
-                        codigo = str(ident.get('codigo_ibge')) if ident.get('codigo_ibge') is not None else None
-                        geo = data.get('geografia_territorio') if isinstance(data.get('geografia_territorio'), dict) else {}
-                        dem = data.get('demografia') if isinstance(data.get('demografia'), dict) else {}
-                        soc = data.get('socioeconomia') if isinstance(data.get('socioeconomia'), dict) else {}
-
-                        area = geo.get('area_territorial_km2', {}).get('valor') if isinstance(geo.get('area_territorial_km2'), dict) else None
-                        bioma = geo.get('bioma', {}).get('valor') if isinstance(geo.get('bioma'), dict) else None
-                        pop = dem.get('populacao_censo_2022', {}).get('valor') if isinstance(dem.get('populacao_censo_2022'), dict) else None
-                        if pop is None:
-                            pop = dem.get('populacao_censo_2010', {}).get('valor') if isinstance(dem.get('populacao_censo_2010'), dict) else None
-                        idhm = soc.get('idhm_2010', {}).get('valor') if isinstance(soc.get('idhm_2010'), dict) else None
-
-                        ctx = {
-                            'slug': slug,
-                            'nome': nome,
-                            'uf': uf,
-                            'codigo_ibge': codigo,
-                            'area_km2': area,
-                            'bioma': bioma,
-                            'populacao': pop,
-                            'idhm': idhm,
-                        }
-                        break
-            except Exception:
-                pass
-
-    if not (m or ctx):
+    ctx = None
+    for municipio in DADOS_MUNICIPIOS:
+        if municipio.get('slug') == slug:
+            ctx = municipio
+            break
+    
+    if not ctx:
         abort(404)
-
-    # Normaliza contexto para o template
-    if m and not ctx:
-        ctx = {
-            'slug': m.slug,
-            'nome': m.nome,
-            'uf': m.uf,
-            'codigo_ibge': m.codigo_ibge,
-        }
 
     return render_template('municipio.html', **ctx)
 
@@ -349,28 +194,8 @@ def cursos():
 # Equipe (professores por JSON e equipe de gestão por JSON)
 @app.route('/equipe')
 def equipe():
-    # Professores: lidos de JSON para facilitar manutenção
-    # Define o caminho base para os arquivos de dados
-    data_dir = Path(__file__).resolve().parent / "planejamento"
-    profs_json_path = data_dir / "professores.json"
-    professores = []
-    try:
-        if profs_json_path.exists():
-            with open(profs_json_path, 'r', encoding='utf-8') as f:
-                professores = json.load(f)
-    except Exception:
-        professores = []
-    # Equipe de gestão (opcional)
-    gestao_json_path = data_dir / "gestao.json"
-    gestao = []
-    try:
-        if gestao_json_path.exists():
-            with open(gestao_json_path, 'r', encoding='utf-8') as f:
-                gestao = json.load(f)
-    except Exception:
-        gestao = []
-
-    return render_template('equipe.html', professores=professores, gestao=gestao)
+    # Usa dados embutidos para garantir funcionamento na Vercel
+    return render_template('equipe.html', professores=DADOS_PROFESSORES, gestao=DADOS_GESTAO)
 
 # Página 404 simples
 @app.errorhandler(404)
